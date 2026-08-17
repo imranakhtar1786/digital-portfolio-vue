@@ -2,159 +2,378 @@ export const services = [
   {
     id: 'web-development',
     title: 'Full-Stack Web Development',
-    shortDesc: 'High-performance Next.js, React, Django & Vue web applications engineered by Imran Akhtar.',
+
+    shortDesc:
+      'Modern, responsive and scalable web applications built with React, Next.js, Vue, Django and Express.',
+
     iconName: 'Code',
+
     startingUsd: 119,
     startingInr: 8999,
-    heroTagline: 'Bespoke web applications built with Next.js, Django, & React at freelancer-friendly pricing.',
-    overview: 'We craft high-speed, SEO-optimized, full-stack web applications tailored for startups, e-commerce brands, and local businesses. From decoupled REST APIs using Django DRF to Next.js frontend rendering, we deliver agency-grade software without big-agency markups.',
+
+    heroTagline:
+      'Custom websites and full-stack applications built for performance, scalability and real business needs.',
+
+    overview:
+      'We build modern digital products ranging from business websites and portfolios to e-commerce platforms and custom web applications. Our development process covers frontend interfaces, backend APIs, databases, authentication, deployment and ongoing technical improvements.',
+
     benefits: [
-      'Core Web Vitals 100/100 performance scoring',
-      'Decoupled Next.js & Django REST Framework architecture',
-      'Redis caching for sub-second load times',
-      'Mobile-first responsive UX with modern micro-animations',
-      'Full source code & IP repository transfer'
+      'Responsive and mobile-first development',
+      'Modern frontend and backend architecture',
+      'REST API development and integration',
+      'Database design and optimization',
+      'Performance-focused development',
+      'Source code ownership and project handover',
     ],
-    techStack: ['Next.js', 'React.js', 'Django', 'Python', 'PostgreSQL', 'Redis', 'Tailwind CSS'],
+
+    techStack: [
+      'React.js',
+      'Next.js',
+      'Vue.js',
+      'JavaScript',
+      'Python',
+      'Django',
+      'Django REST Framework',
+      'Express.js',
+      'FastAPI',
+      'PostgreSQL',
+      'MySQL',
+      'SQLite',
+      'Redis',
+      'Tailwind CSS',
+      'Bootstrap',
+      'MUI',
+      'SCSS',
+      'Zustand',
+      'Redux',
+    ],
+
     deliverables: [
-      'Full Source Code Repository',
-      'Database Schema & Migrations',
-      'REST / GraphQL API Layer',
-      'Admin Panel & Content Management System',
-      'Production Server Deployment & SSL Setup'
+      'Responsive Frontend Development',
+      'Backend APIs and Integrations',
+      'Database Setup and Configuration',
+      'Authentication and Admin Features',
+      'Deployment and Domain Configuration',
+      'Source Code and Project Handover',
     ],
+
     faqs: [
-      { q: 'Why are your rates so competitive compared to big agencies?', a: 'As a lean freelance startup led by Imran Akhtar, we eliminate corporate overhead costs and pass those direct savings directly to you.' },
-      { q: 'How long does a standard web development project take?', a: 'Standard landing pages take 3-7 days; full-stack web apps take 2 to 4 weeks.' }
-    ]
+      {
+        q: 'What types of websites and applications do you build?',
+        a: 'We build business websites, portfolios, e-commerce platforms, dashboards, custom web applications and API-based systems.',
+      },
+      {
+        q: 'Will I receive the source code?',
+        a: 'Yes. Project source code and relevant project files are handed over according to the agreed project scope.',
+      },
+      {
+        q: 'How much does a web development project cost?',
+        a: 'The starting price covers a basic project scope. Final pricing depends on pages, features, integrations, backend requirements and overall complexity.',
+      },
+    ],
   },
+
   {
     id: 'seo-optimization',
-    title: 'SEO & Speed Optimization',
-    shortDesc: 'Technical SEO audits, Google search ranking strategies, and PageSpeed 90+ optimization.',
+    title: 'SEO & Website Optimization',
+
+    shortDesc:
+      'Technical SEO, website speed optimization, search visibility and local business optimization.',
+
     iconName: 'TrendingUp',
+
     startingUsd: 69,
     startingInr: 4999,
-    heroTagline: 'Dominate Google search rankings and drive qualified organic traffic with technical SEO.',
-    overview: 'We optimize your website for Google Search rankings through technical SEO audits, site speed optimization, schema markup, and high-value keyword targeting.',
+
+    heroTagline:
+      'Improve website performance, technical SEO and search visibility with practical optimization strategies.',
+
+    overview:
+      'We help improve website discoverability and performance through technical SEO, metadata optimization, Core Web Vitals improvements, structured data, Google Search Console setup and website speed optimization.',
+
     benefits: [
-      'PageSpeed Insights 90+ score optimization',
-      'Keyword strategy targeting high-intent commercial searches',
-      'Structured data (JSON-LD Schema) for Google rich snippets',
-      'Fix crawl errors, broken links, & mobile usability issues'
+      'Technical SEO audit and issue fixing',
+      'Website speed and performance improvements',
+      'Core Web Vitals optimization',
+      'Metadata and on-page SEO improvements',
+      'Structured data and schema implementation',
+      'Google Search Console setup and monitoring',
+      'Local business and Google Business Profile support',
     ],
-    techStack: ['Google Search Console', 'Ahrefs', 'Lighthouse', 'Schema.org'],
+
+    techStack: [
+      'Google Search Console',
+      'Google Analytics',
+      'Lighthouse',
+      'PageSpeed Insights',
+      'Schema.org',
+      'Next.js',
+      'Google Business Profile',
+    ],
+
     deliverables: [
-      'Technical SEO Audit & Fixes',
-      'Page Speed & Core Web Vitals Optimization',
-      'On-Page & Meta Tag Optimization',
-      'Monthly Ranking Tracking Reports'
+      'Technical SEO Review',
+      'Page Speed Optimization',
+      'On-Page SEO Improvements',
+      'Meta Tags and Structured Data',
+      'Google Search Console Setup',
+      'Local Business Optimization',
     ],
+
     faqs: [
-      { q: 'How fast do page speed optimizations take effect?', a: 'Page speed improvements take effect immediately upon deployment.' }
-    ]
+      {
+        q: 'Can you guarantee first-page Google rankings?',
+        a: 'No ethical SEO provider can guarantee a specific Google ranking. We focus on technical improvements, content structure and best practices that support long-term search visibility.',
+      },
+      {
+        q: 'When will website speed improvements be visible?',
+        a: 'Performance improvements are generally visible after deployment, while SEO and search ranking changes can take longer depending on indexing and competition.',
+      },
+    ],
   },
+
   {
     id: 'ui-ux-design',
-    title: 'Landing Page & UI/UX Design',
-    shortDesc: 'Single-page landing websites, modern UI design systems, and micro-animations.',
+    title: 'Landing Page & UI Development',
+
+    shortDesc:
+      'Modern landing pages, responsive interfaces and animated digital experiences built for conversion.',
+
     iconName: 'Palette',
+
     startingUsd: 79,
     startingInr: 5999,
-    heroTagline: 'Modern digital landing pages designed to captivate visitors and convert leads.',
-    overview: 'We craft human-centric UI/UX landing pages and design systems in Figma and Vue/React, complete with responsive mobile wireframes and high-conversion layouts.',
+
+    heroTagline:
+      'High-impact landing pages and modern interfaces designed to communicate clearly and perform across devices.',
+
+    overview:
+      'We design and develop responsive landing pages, business websites and user interfaces with modern layouts, clear content hierarchy, smooth animations and conversion-focused user journeys.',
+
     benefits: [
-      'Interactive Figma prototypes & responsive UI',
-      'Design token system for consistent typography & colors',
-      'High-converting lead capture form integration',
-      'Responsive mobile component libraries'
+      'Responsive desktop, tablet and mobile layouts',
+      'Modern UI and component architecture',
+      'Smooth motion and micro-interactions',
+      'Conversion-focused page structure',
+      'Fast and optimized frontend implementation',
+      'Reusable and maintainable components',
     ],
-    techStack: ['Figma', 'React.js', 'Vue 3', 'Tailwind CSS'],
+
+    techStack: [
+      'React.js',
+      'Next.js',
+      'Vue.js',
+      'Tailwind CSS',
+      'Bootstrap',
+      'MUI',
+      'SCSS',
+      'Motion',
+      'GSAP',
+      'Lenis',
+    ],
+
     deliverables: [
-      'Figma Master File & Code Templates',
-      'Responsive Mobile-First UI',
-      'Exported Vector SVG Assets & Fonts'
+      'Responsive Landing Page',
+      'Modern UI Components',
+      'Smooth Animations and Interactions',
+      'Mobile Optimization',
+      'Contact or Lead Forms',
+      'Production-Ready Source Code',
     ],
+
     faqs: [
-      { q: 'Can you build a complete landing page for ₹5,999?', a: 'Yes! Our starter landing package includes responsive layout design, mobile optimization, and contact form integration.' }
-    ]
+      {
+        q: 'Does the starting price include unlimited pages?',
+        a: 'No. The starting price covers a standard project scope. Additional pages, custom sections, animations and advanced features may increase the final cost.',
+      },
+      {
+        q: 'Can you create an animated modern website?',
+        a: 'Yes. We can implement smooth scrolling, page transitions, micro-interactions and motion-based animations where appropriate.',
+      },
+    ],
   },
+
   {
     id: 'digital-marketing',
     title: 'Digital Marketing & Ads',
-    shortDesc: 'Performance marketing, Meta & Google Ads campaigns, and ROI-focused lead generation.',
+
+    shortDesc:
+      'Digital campaigns, lead generation, conversion-focused landing pages and marketing integrations.',
+
     iconName: 'Megaphone',
+
     startingUsd: 79,
     startingInr: 5999,
-    heroTagline: 'Data-driven marketing campaigns that scale customer acquisition for startups and small businesses.',
-    overview: 'We design and run targeted ad campaigns across Meta (Facebook/Instagram), Google Search, and YouTube, paired with friction-free lead capture pages to maximize conversion rates.',
+
+    heroTagline:
+      'Build a stronger digital presence with focused campaigns, optimized landing pages and measurable customer journeys.',
+
+    overview:
+      'We support businesses with digital marketing infrastructure including campaign landing pages, lead generation systems, tracking setup, email integrations and performance-focused website improvements.',
+
     benefits: [
-      'Targeted campaign strategies yielding higher ROAS',
-      'A/B tested ad creatives & landing page copywriting',
-      'Pixel tracking, UTM parameters, & conversion attribution',
-      'Weekly performance reporting and budget tuning'
+      'Conversion-focused landing pages',
+      'Lead generation workflow setup',
+      'Marketing and tracking integrations',
+      'Email form and automation integrations',
+      'Campaign-ready website optimization',
+      'Performance reporting setup',
     ],
-    techStack: ['Google Ads', 'Meta Ads Manager', 'GA4', 'Framer Motion', 'Tailwind CSS'],
+
+    techStack: [
+      'Google Ads',
+      'Meta Ads',
+      'Google Analytics',
+      'Google Search Console',
+      'Brevo',
+      'Zoho Mail',
+      'JavaScript',
+      'Next.js',
+    ],
+
     deliverables: [
-      'Custom Ad Campaign Setup & Targeting',
-      'Ad Visual Creatives & Copywriting',
-      'High-Conversion Landing Page Design',
-      'Analytics Dashboard Setup'
+      'Campaign Landing Pages',
+      'Lead Capture Forms',
+      'Analytics and Tracking Setup',
+      'Email Integration',
+      'Marketing Website Optimization',
+      'Campaign Support Based on Scope',
     ],
+
     faqs: [
-      { q: 'Which ad platforms do you specialize in?', a: 'We specialize in Meta Ads (Facebook & Instagram) and Google Search & Display Ads.' }
-    ]
+      {
+        q: 'Do you manage advertising campaigns?',
+        a: 'Campaign services can be provided based on project requirements, platforms, budget and agreed scope.',
+      },
+      {
+        q: 'Can you connect my website forms with email services?',
+        a: 'Yes. We can integrate supported services such as Brevo or Zoho Mail depending on your requirements.',
+      },
+    ],
   },
+
   {
     id: 'cloud-devops',
-    title: 'Cloud & Server Migration',
-    shortDesc: 'VPS server setup, Ubuntu/Nginx deployment, domain transfer, and zero-downtime database migration.',
+    title: 'Cloud & Server Deployment',
+
+    shortDesc:
+      'VPS setup, cloud deployment, domain configuration, Docker, Nginx and application migration.',
+
     iconName: 'Server',
+
     startingUsd: 89,
     startingInr: 6999,
-    heroTagline: 'Secure server setup, Nginx reverse proxying, and seamless VPS migrations with zero downtime.',
-    overview: 'Specialized in server provisioning, VPS hosting (GoDaddy, AWS, DigitalOcean, Linode), Nginx reverse proxy setup, SSL certificates, Apache/MySQL configuration, and automated backups.',
+
+    heroTagline:
+      'Deploy, configure and manage web applications with practical cloud, VPS and server infrastructure.',
+
+    overview:
+      'We help deploy and configure web applications on cloud platforms and VPS infrastructure. Services include Linux server setup, Nginx configuration, SSL, domains, DNS, Docker, application deployment and website migration.',
+
     benefits: [
-      '100% data preservation during migration',
-      'Seamless domain transfer and DNS configuration without data loss',
-      'Nginx caching & Gzip compression for rapid asset delivery',
-      'Hardened Linux security & SSL configuration'
+      'Linux VPS configuration',
+      'Nginx reverse proxy setup',
+      'SSL and domain configuration',
+      'Application deployment',
+      'Docker-based environments',
+      'Database migration and configuration',
+      'Backup and recovery planning',
     ],
-    techStack: ['Linux Ubuntu', 'Nginx', 'Apache', 'MySQL', 'GoDaddy VPS', 'WordPress', 'DevOps'],
+
+    techStack: [
+      'Linux Ubuntu',
+      'Nginx',
+      'Docker',
+      'DigitalOcean',
+      'AWS',
+      'Vercel',
+      'Netlify',
+      'Hostinger',
+      'GoDaddy',
+      'PostgreSQL',
+      'MySQL',
+      'GitHub',
+    ],
+
     deliverables: [
-      'Configured Linux Ubuntu VPS',
-      'Nginx Reverse Proxy & SSL Setup',
-      'Database Migration Scripting',
-      'Automated Backups Setup'
+      'Server or Cloud Environment Setup',
+      'Application Deployment',
+      'Nginx and SSL Configuration',
+      'Domain and DNS Setup',
+      'Database Migration Support',
+      'Basic Backup Configuration',
     ],
+
     faqs: [
-      { q: 'Can you migrate our WordPress site without data loss?', a: 'Yes! As demonstrated with Kiloi Foods, we guarantee 100% data preservation and zero downtime.' }
-    ]
+      {
+        q: 'Can you migrate an existing website or application?',
+        a: 'Yes. We can assess the existing infrastructure and plan a migration based on the application, database, hosting provider and downtime requirements.',
+      },
+      {
+        q: 'Which hosting platforms do you support?',
+        a: 'Depending on the project, we can work with DigitalOcean, AWS, Vercel, Netlify, Hostinger, GoDaddy and compatible Linux VPS environments.',
+      },
+    ],
   },
+
   {
     id: 'mobile-app-development',
     title: 'Mobile App Development',
-    shortDesc: 'Native & cross-platform iOS & Android mobile apps with fluid animations & offline capabilities.',
+
+    shortDesc:
+      'Cross-platform Android and iOS applications built with React Native and modern backend APIs.',
+
     iconName: 'Smartphone',
+
     startingUsd: 199,
     startingInr: 14999,
-    heroTagline: 'Intuitive iOS & Android applications built with React Native for seamless mobile UX.',
-    overview: 'Our engineering team builds cross-platform iOS & Android applications with 60 FPS animations, push notification integrations, biometrics, offline storage, and secure backend APIs.',
+
+    heroTagline:
+      'Custom Android and iOS applications built with a shared React Native codebase and scalable backend architecture.',
+
+    overview:
+      'We develop cross-platform mobile applications for Android and iOS using React Native. Applications can include authentication, API integration, databases, device features, offline storage and custom functionality depending on project requirements.',
+
     benefits: [
-      'Cross-platform React Native codebase saving up to 50% development cost',
-      'Native device feature access (Camera, GPS, Biometrics)',
-      'Sub-second app launch time and smooth gesture transitions',
-      'App Store & Google Play Store submission management'
+      'Single codebase for Android and iOS',
+      'Backend API integration',
+      'Authentication and user management',
+      'Offline data support where required',
+      'Modern mobile UI and navigation',
+      'Scalable architecture for future development',
     ],
-    techStack: ['React Native', 'Node.js', 'Firebase', 'Zustand', 'SQLite'],
+
+    techStack: [
+      'React Native',
+      'JavaScript',
+      'Python',
+      'Django REST Framework',
+      'Express.js',
+      'FastAPI',
+      'PostgreSQL',
+      'SQLite',
+      'Zustand',
+      'Redux',
+    ],
+
     deliverables: [
-      'Production ready iOS (.ipa) & Android (.apk/.aab) builds',
-      'App Store & Play Store Listing Assets',
-      'Push Notification Service Integration',
-      'Source Code & Build Configuration'
+      'React Native Application Source Code',
+      'Android and iOS Project Setup',
+      'API Integration',
+      'Authentication Features',
+      'Build Configuration',
+      'Deployment Guidance Based on Scope',
     ],
+
     faqs: [
-      { q: 'Do you handle App Store and Play Store approval?', a: 'Yes! We manage the entire submission process including store compliance and icon guidelines.' }
-    ]
-  }
+      {
+        q: 'Will the app work on both Android and iOS?',
+        a: 'Yes. The service is designed for cross-platform Android and iOS development using React Native, subject to the project requirements and supported device features.',
+      },
+      {
+        q: 'Does the starting price include a complete complex application?',
+        a: 'No. The starting price represents a basic project scope. Final pricing depends on screens, features, APIs, authentication, backend requirements and overall complexity.',
+      },
+    ],
+  },
 ]

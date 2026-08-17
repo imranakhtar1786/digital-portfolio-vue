@@ -1,5 +1,7 @@
 <script setup>
 import { ref, watch, onBeforeUnmount } from 'vue'
+import { Motion } from 'motion-v'
+
 import {
   Sparkles,
   Send,
@@ -12,13 +14,33 @@ import {
   Layers3,
   Clock3,
   Globe2,
+  Phone,
 } from 'lucide-vue-next'
 
 const props = defineProps({
-  isOpen: Boolean,
+  isOpen: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits(['close'])
+
+/* =========================================================
+   YOUR ORIGINAL DETAILS
+   Replace these with your actual details
+========================================================= */
+
+const contactInfo = {
+  name: 'Imran Akhtar',
+  email: 'imranakhtar1786@gmail.com',
+  phone: '+919155161786',
+  company: 'Your Company Name',
+}
+
+/* =========================================================
+   FORM
+========================================================= */
 
 const formSubmitted = ref(false)
 
@@ -41,7 +63,9 @@ const projectTypes = [
 ]
 
 const submitForm = () => {
-  if (!form.value.name.trim() || !form.value.email.trim()) return
+  if (!form.value.name.trim() || !form.value.email.trim()) {
+    return
+  }
 
   formSubmitted.value = true
 }
@@ -106,14 +130,16 @@ onBeforeUnmount(() => {
       class="relative z-10 mx-auto flex min-h-screen w-[90%] max-w-7xl flex-col justify-center py-14 sm:py-16 lg:py-12"
     >
       <!-- ===================================================== -->
-      <!-- COMPACT HEADER -->
+      <!-- HEADER -->
       <!-- ===================================================== -->
 
-      <div
+      <Motion
+        :initial="{ opacity: 0, y: 30 }"
+        :while-in-view="{ opacity: 1, y: 0 }"
+        :viewport="{ once: true, amount: 0.2 }"
+        :transition="{ duration: 0.7, ease: 'easeOut' }"
         class="mb-8 flex flex-col gap-5 border-b border-white/[0.06] pb-7 lg:mb-10 lg:flex-row lg:items-end lg:justify-between"
       >
-        <!-- Left -->
-
         <div>
           <div
             class="flex items-center gap-2.5 font-mono text-[9px] uppercase tracking-[0.3em] text-[#D4AF37]"
@@ -131,15 +157,13 @@ onBeforeUnmount(() => {
           </h2>
         </div>
 
-        <!-- Right -->
-
         <div class="max-w-md lg:pb-1">
           <p class="text-xs leading-[1.8] text-zinc-500 sm:text-sm">
-            Have a project, product, or idea in mind? Tell us what you're working on and we'll help
+            Have a project, product, or idea in mind? Tell me what you're working on and I'll help
             you figure out the right direction.
           </p>
         </div>
-      </div>
+      </Motion>
 
       <!-- ===================================================== -->
       <!-- CONTACT WORKSPACE -->
@@ -147,24 +171,24 @@ onBeforeUnmount(() => {
 
       <div class="grid gap-6 lg:grid-cols-[0.72fr_1.28fr]">
         <!-- ================================================= -->
-        <!-- LEFT INFORMATION -->
+        <!-- LEFT -->
         <!-- ================================================= -->
 
         <div class="flex flex-col gap-4">
-          <!-- Contact overview -->
+          <!-- CONTACT CARD -->
 
-          <div
+          <Motion
+            :initial="{ opacity: 0, x: -35 }"
+            :while-in-view="{ opacity: 1, x: 0 }"
+            :viewport="{ once: true, amount: 0.15 }"
+            :transition="{ duration: 0.65, ease: 'easeOut' }"
             class="relative overflow-hidden rounded-[1.75rem] border border-white/[0.07] bg-[#070709] p-6 sm:p-7"
           >
-            <!-- Glow -->
-
             <div
               class="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-[#D4AF37]/[0.05] blur-[70px]"
             ></div>
 
             <div class="relative">
-              <!-- Header -->
-
               <div class="flex items-center justify-between">
                 <div>
                   <p class="font-mono text-[8px] uppercase tracking-[0.25em] text-zinc-600">
@@ -183,12 +207,10 @@ onBeforeUnmount(() => {
                 </div>
               </div>
 
-              <!-- Contact items -->
-
               <div class="mt-7 space-y-4">
-                <!-- Email -->
+                <!-- EMAIL -->
 
-                <a href="mailto:hello@yourcompany.com" class="group flex items-center gap-3.5">
+                <a :href="`mailto:${contactInfo.email}`" class="group flex items-center gap-3.5">
                   <div
                     class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.07] bg-white/[0.02] transition duration-300 group-hover:border-[#D4AF37]/30 group-hover:bg-[#D4AF37]/[0.04]"
                   >
@@ -203,12 +225,37 @@ onBeforeUnmount(() => {
                     <p
                       class="mt-1 truncate text-xs font-medium text-zinc-300 transition group-hover:text-white"
                     >
-                      hello@yourcompany.com
+                      {{ contactInfo.email }}
                     </p>
                   </div>
                 </a>
 
-                <!-- Response -->
+                <!-- PHONE -->
+
+                <a
+                  :href="`tel:${contactInfo.phone.replace(/\s/g, '')}`"
+                  class="group flex items-center gap-3.5"
+                >
+                  <div
+                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.07] bg-white/[0.02] transition duration-300 group-hover:border-[#D4AF37]/30 group-hover:bg-[#D4AF37]/[0.04]"
+                  >
+                    <Phone :size="15" class="text-zinc-500 transition group-hover:text-[#D4AF37]" />
+                  </div>
+
+                  <div>
+                    <p class="font-mono text-[7px] uppercase tracking-[0.2em] text-zinc-600">
+                      Direct Contact
+                    </p>
+
+                    <p
+                      class="mt-1 text-xs font-medium text-zinc-300 transition group-hover:text-white"
+                    >
+                      {{ contactInfo.phone }}
+                    </p>
+                  </div>
+                </a>
+
+                <!-- RESPONSE -->
 
                 <div class="flex items-center gap-3.5">
                   <div
@@ -228,7 +275,7 @@ onBeforeUnmount(() => {
                   </div>
                 </div>
 
-                <!-- Scope -->
+                <!-- SERVICES -->
 
                 <div class="flex items-center gap-3.5">
                   <div
@@ -243,17 +290,23 @@ onBeforeUnmount(() => {
                     </p>
 
                     <p class="mt-1 text-xs font-medium text-zinc-300">
-                      Web · Apps · Digital Products
+                      Websites · Web Apps · E-commerce
                     </p>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+          </Motion>
 
-          <!-- Process -->
+          <!-- PROCESS -->
 
-          <div class="rounded-[1.75rem] border border-white/[0.07] bg-[#070709] p-6 sm:p-7">
+          <Motion
+            :initial="{ opacity: 0, x: -35 }"
+            :while-in-view="{ opacity: 1, x: 0 }"
+            :viewport="{ once: true, amount: 0.15 }"
+            :transition="{ duration: 0.65, delay: 0.12, ease: 'easeOut' }"
+            class="rounded-[1.75rem] border border-white/[0.07] bg-[#070709] p-6 sm:p-7"
+          >
             <div class="flex items-center justify-between">
               <div>
                 <p class="font-mono text-[8px] uppercase tracking-[0.25em] text-zinc-600">
@@ -269,8 +322,6 @@ onBeforeUnmount(() => {
             </div>
 
             <div class="mt-6 space-y-4">
-              <!-- Step -->
-
               <div class="flex items-center gap-3">
                 <span
                   class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-[#D4AF37]/30 bg-[#D4AF37]/[0.05] font-mono text-[8px] text-[#D4AF37]"
@@ -282,16 +333,12 @@ onBeforeUnmount(() => {
                   <p class="text-xs font-semibold text-zinc-300">Share your idea</p>
 
                   <p class="mt-0.5 text-[9px] text-zinc-600">
-                    Tell us what you're trying to build.
+                    Tell me what you're trying to build.
                   </p>
                 </div>
               </div>
 
-              <!-- Line -->
-
               <div class="ml-3.5 h-3 w-px bg-white/[0.08]"></div>
-
-              <!-- Step -->
 
               <div class="flex items-center gap-3">
                 <span
@@ -307,11 +354,7 @@ onBeforeUnmount(() => {
                 </div>
               </div>
 
-              <!-- Line -->
-
               <div class="ml-3.5 h-3 w-px bg-white/[0.08]"></div>
-
-              <!-- Step -->
 
               <div class="flex items-center gap-3">
                 <span
@@ -323,15 +366,19 @@ onBeforeUnmount(() => {
                 <div>
                   <p class="text-xs font-semibold text-zinc-300">Build the solution</p>
 
-                  <p class="mt-0.5 text-[9px] text-zinc-600">Design, engineering, launch.</p>
+                  <p class="mt-0.5 text-[9px] text-zinc-600">Design, engineering, and launch.</p>
                 </div>
               </div>
             </div>
-          </div>
+          </Motion>
 
-          <!-- Privacy -->
+          <!-- PRIVACY -->
 
-          <div
+          <Motion
+            :initial="{ opacity: 0, y: 20 }"
+            :while-in-view="{ opacity: 1, y: 0 }"
+            :viewport="{ once: true, amount: 0.15 }"
+            :transition="{ duration: 0.55, delay: 0.2 }"
             class="flex items-start gap-3 rounded-[1.5rem] border border-[#D4AF37]/10 bg-[#070709] p-5"
           >
             <ShieldCheck :size="16" class="mt-0.5 shrink-0 text-[#D4AF37]" />
@@ -346,36 +393,42 @@ onBeforeUnmount(() => {
                 discussing.
               </p>
             </div>
-          </div>
+          </Motion>
         </div>
 
         <!-- ================================================= -->
         <!-- RIGHT FORM -->
         <!-- ================================================= -->
 
-        <div
+        <Motion
+          :initial="{ opacity: 0, x: 40 }"
+          :while-in-view="{ opacity: 1, x: 0 }"
+          :viewport="{ once: true, amount: 0.15 }"
+          :transition="{ duration: 0.7, delay: 0.1, ease: 'easeOut' }"
           class="relative overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-[#070709]"
         >
-          <!-- Form glow -->
-
           <div
             class="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#D4AF37]/[0.055] blur-[90px]"
           ></div>
 
           <div class="relative p-6 sm:p-8 lg:p-9">
-            <!-- ================================================= -->
             <!-- SUCCESS -->
-            <!-- ================================================= -->
 
-            <div
+            <Motion
               v-if="formSubmitted"
+              :initial="{ opacity: 0, scale: 0.96 }"
+              :animate="{ opacity: 1, scale: 1 }"
+              :transition="{ duration: 0.45 }"
               class="flex min-h-[500px] flex-col items-center justify-center px-4 text-center"
             >
-              <div
+              <Motion
+                :initial="{ scale: 0, rotate: -20 }"
+                :animate="{ scale: 1, rotate: 0 }"
+                :transition="{ duration: 0.5, delay: 0.15 }"
                 class="flex h-20 w-20 items-center justify-center rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/[0.06] shadow-[0_0_50px_rgba(212,175,55,0.12)]"
               >
                 <CheckCircle2 :size="38" class="text-[#D4AF37]" />
-              </div>
+              </Motion>
 
               <p class="mt-6 font-mono text-[8px] uppercase tracking-[0.3em] text-[#D4AF37]">
                 Message Received
@@ -398,15 +451,11 @@ onBeforeUnmount(() => {
               >
                 Send Another Message
               </button>
-            </div>
+            </Motion>
 
-            <!-- ================================================= -->
             <!-- FORM -->
-            <!-- ================================================= -->
 
             <form v-else class="relative space-y-5" @submit.prevent="submitForm">
-              <!-- Form heading -->
-
               <div class="flex items-start justify-between border-b border-white/[0.06] pb-5">
                 <div>
                   <p class="font-mono text-[8px] uppercase tracking-[0.25em] text-[#D4AF37]">
@@ -414,14 +463,14 @@ onBeforeUnmount(() => {
                   </p>
 
                   <h3 class="mt-2 text-xl font-black uppercase tracking-[-0.04em] sm:text-2xl">
-                    Tell us about it<span class="text-[#D4AF37]">.</span>
+                    Tell me about it<span class="text-[#D4AF37]">.</span>
                   </h3>
                 </div>
 
                 <ArrowUpRight :size="18" class="text-zinc-700" />
               </div>
 
-              <!-- Name / Email -->
+              <!-- NAME / EMAIL -->
 
               <div class="grid gap-4 sm:grid-cols-2">
                 <div>
@@ -459,7 +508,7 @@ onBeforeUnmount(() => {
                 </div>
               </div>
 
-              <!-- Company -->
+              <!-- COMPANY -->
 
               <div>
                 <label
@@ -477,7 +526,7 @@ onBeforeUnmount(() => {
                 />
               </div>
 
-              <!-- Project Type -->
+              <!-- PROJECT TYPE -->
 
               <div>
                 <label
@@ -504,7 +553,7 @@ onBeforeUnmount(() => {
                 </div>
               </div>
 
-              <!-- Message -->
+              <!-- MESSAGE -->
 
               <div>
                 <div class="mb-1.5 flex items-center justify-between">
@@ -520,12 +569,12 @@ onBeforeUnmount(() => {
                 <textarea
                   v-model="form.message"
                   rows="4"
-                  placeholder="Tell us what you're trying to build, the problem you're solving, or what you need help with..."
+                  placeholder="Tell me what you're trying to build, the problem you're solving, or what you need help with..."
                   class="w-full resize-none rounded-xl border border-white/[0.08] bg-[#0B0B0E] px-4 py-3 text-xs leading-relaxed text-white outline-none transition placeholder:text-zinc-700 focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/10"
                 ></textarea>
               </div>
 
-              <!-- Submit -->
+              <!-- SUBMIT -->
 
               <button
                 type="submit"
@@ -538,8 +587,6 @@ onBeforeUnmount(() => {
                   class="transition-transform duration-300 group-hover:translate-x-1"
                 />
               </button>
-
-              <!-- Footer -->
 
               <div
                 class="flex items-center justify-center gap-2 pt-1 font-mono text-[7px] uppercase tracking-[0.15em] text-zinc-700"
@@ -554,14 +601,18 @@ onBeforeUnmount(() => {
               </div>
             </form>
           </div>
-        </div>
+        </Motion>
       </div>
 
       <!-- ===================================================== -->
       <!-- BOTTOM BAR -->
       <!-- ===================================================== -->
 
-      <div
+      <Motion
+        :initial="{ opacity: 0, y: 20 }"
+        :while-in-view="{ opacity: 1, y: 0 }"
+        :viewport="{ once: true, amount: 0.2 }"
+        :transition="{ duration: 0.6 }"
         class="mt-5 flex flex-col gap-3 border-t border-white/[0.05] pt-4 sm:flex-row sm:items-center sm:justify-between"
       >
         <p class="font-mono text-[7px] uppercase tracking-[0.2em] text-zinc-700">
@@ -569,15 +620,17 @@ onBeforeUnmount(() => {
         </p>
 
         <div class="flex items-center gap-2">
-          <span
+          <Motion
+            :animate="{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }"
+            :transition="{ duration: 1.5, repeat: Infinity }"
             class="h-1.5 w-1.5 rounded-full bg-[#D4AF37] shadow-[0_0_8px_rgba(212,175,55,0.7)]"
-          ></span>
+          />
 
           <span class="font-mono text-[7px] uppercase tracking-[0.2em] text-zinc-600">
             Open for new projects
           </span>
         </div>
-      </div>
+      </Motion>
     </div>
   </section>
 
@@ -594,7 +647,7 @@ onBeforeUnmount(() => {
     leave-to-class="opacity-0"
   >
     <div v-if="isOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <!-- Backdrop -->
+      <!-- BACKDROP -->
 
       <button
         type="button"
@@ -603,19 +656,21 @@ onBeforeUnmount(() => {
         @click="closeModal"
       ></button>
 
-      <!-- Modal -->
+      <!-- MODAL -->
 
-      <div
+      <Motion
+        :initial="{ opacity: 0, y: 30, scale: 0.96 }"
+        :animate="{ opacity: 1, y: 0, scale: 1 }"
+        :exit="{ opacity: 0, y: 20, scale: 0.97 }"
+        :transition="{ duration: 0.35, ease: 'easeOut' }"
         class="relative z-10 max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-[2rem] border border-white/[0.1] bg-[#070709] shadow-[0_30px_100px_rgba(0,0,0,0.7)]"
       >
-        <!-- Glow -->
-
         <div
           class="pointer-events-none absolute right-0 top-0 h-52 w-52 rounded-full bg-[#D4AF37]/[0.05] blur-[80px]"
         ></div>
 
         <div class="relative p-6 sm:p-8">
-          <!-- Modal header -->
+          <!-- HEADER -->
 
           <div class="flex items-center justify-between border-b border-white/[0.06] pb-5">
             <div>
@@ -636,9 +691,15 @@ onBeforeUnmount(() => {
             </button>
           </div>
 
-          <!-- Modal success -->
+          <!-- SUCCESS -->
 
-          <div v-if="formSubmitted" class="py-14 text-center">
+          <Motion
+            v-if="formSubmitted"
+            :initial="{ opacity: 0, scale: 0.95 }"
+            :animate="{ opacity: 1, scale: 1 }"
+            :transition="{ duration: 0.4 }"
+            class="py-14 text-center"
+          >
             <CheckCircle2 :size="48" class="mx-auto text-[#D4AF37]" />
 
             <h3 class="mt-5 text-2xl font-black uppercase tracking-tight">
@@ -648,7 +709,7 @@ onBeforeUnmount(() => {
             <p class="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-zinc-500">
               Thanks,
               <span class="text-zinc-300">{{ form.name }}</span
-              >. We'll get back to you soon.
+              >. I'll get back to you soon.
             </p>
 
             <button
@@ -658,13 +719,11 @@ onBeforeUnmount(() => {
             >
               Close
             </button>
-          </div>
+          </Motion>
 
-          <!-- Modal form -->
+          <!-- FORM -->
 
           <form v-else class="mt-6 space-y-5" @submit.prevent="submitForm">
-            <!-- Name -->
-
             <div>
               <label
                 class="mb-2 block font-mono text-[9px] uppercase tracking-widest text-zinc-600"
@@ -680,8 +739,6 @@ onBeforeUnmount(() => {
                 class="w-full rounded-xl border border-white/[0.08] bg-[#0B0B0E] px-4 py-3.5 text-sm text-white outline-none placeholder:text-zinc-700 focus:border-[#D4AF37]/50"
               />
             </div>
-
-            <!-- Email -->
 
             <div>
               <label
@@ -699,8 +756,6 @@ onBeforeUnmount(() => {
               />
             </div>
 
-            <!-- Company -->
-
             <div>
               <label
                 class="mb-2 block font-mono text-[9px] uppercase tracking-widest text-zinc-600"
@@ -715,8 +770,6 @@ onBeforeUnmount(() => {
                 class="w-full rounded-xl border border-white/[0.08] bg-[#0B0B0E] px-4 py-3.5 text-sm text-white outline-none placeholder:text-zinc-700 focus:border-[#D4AF37]/50"
               />
             </div>
-
-            <!-- Project -->
 
             <div>
               <label
@@ -743,8 +796,6 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <!-- Message -->
-
             <div>
               <label
                 class="mb-2 block font-mono text-[9px] uppercase tracking-widest text-zinc-600"
@@ -755,12 +806,10 @@ onBeforeUnmount(() => {
               <textarea
                 v-model="form.message"
                 rows="4"
-                placeholder="Tell us briefly about your project..."
+                placeholder="Tell me briefly about your project..."
                 class="w-full resize-none rounded-xl border border-white/[0.08] bg-[#0B0B0E] px-4 py-3.5 text-sm text-white outline-none placeholder:text-zinc-700 focus:border-[#D4AF37]/50"
               ></textarea>
             </div>
-
-            <!-- Submit -->
 
             <button
               type="submit"
@@ -772,7 +821,7 @@ onBeforeUnmount(() => {
             </button>
           </form>
         </div>
-      </div>
+      </Motion>
     </div>
   </Transition>
 </template>

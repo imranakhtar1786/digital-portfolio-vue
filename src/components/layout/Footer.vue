@@ -1,6 +1,7 @@
 <script setup>
 import { RouterLink } from 'vue-router'
 import { ArrowUpRight, Linkedin, Github, Mail, Instagram } from 'lucide-vue-next'
+import { Phone, MessageCircle } from 'lucide-vue-next'
 </script>
 
 <template>
@@ -46,7 +47,7 @@ import { ArrowUpRight, Linkedin, Github, Mail, Instagram } from 'lucide-vue-next
           </p>
 
           <!-- Social Links -->
-          <div class="mt-7 flex items-center gap-3">
+          <!-- <div class="mt-7 flex items-center gap-3">
             <a
               href="#"
               aria-label="LinkedIn"
@@ -70,7 +71,7 @@ import { ArrowUpRight, Linkedin, Github, Mail, Instagram } from 'lucide-vue-next
             >
               <Instagram :size="15" class="text-zinc-500 transition group-hover:text-[#D4AF37]" />
             </a>
-          </div>
+          </div> -->
         </div>
 
         <!-- NAVIGATION -->
@@ -121,18 +122,70 @@ import { ArrowUpRight, Linkedin, Github, Mail, Instagram } from 'lucide-vue-next
           </p>
 
           <!-- Email -->
-          <a
-            href="mailto:hello@yourcompany.com"
-            class="group mt-6 flex w-fit items-center gap-3 text-sm text-zinc-300 transition hover:text-white"
-          >
-            <span
-              class="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.02]"
+          <div class="mt-6 flex flex-wrap gap-3">
+            <!-- Email -->
+            <a
+              href="mailto:imranakhtar1786@gmail.com"
+              class="group flex items-center gap-3 text-sm text-zinc-300 transition hover:text-white"
             >
-              <Mail :size="14" class="text-zinc-500 transition group-hover:text-[#D4AF37]" />
-            </span>
+              <span
+                class="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.02]"
+              >
+                <Mail :size="14" class="text-zinc-500 transition group-hover:text-[#D4AF37]" />
+              </span>
 
-            <span> hello@yourcompany.com </span>
-          </a>
+              <span>imranakhtar1786@gmail.com</span>
+            </a>
+
+            <!-- Phone -->
+            <a
+              href="tel:+919155161786"
+              class="group flex items-center gap-3 text-sm text-zinc-300 transition hover:text-white"
+            >
+              <span
+                class="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.02]"
+              >
+                <Phone :size="14" class="text-zinc-500 transition group-hover:text-[#D4AF37]" />
+              </span>
+
+              <span>+91 91551 61786</span>
+            </a>
+
+            <!-- Floating Contact Buttons -->
+            <div class="fixed bottom-6 right-5 z-50 flex flex-col gap-3 sm:bottom-8 sm:right-8">
+              <!-- WhatsApp -->
+              <a
+                href="https://wa.me/919155161786"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Chat on WhatsApp"
+                class="group relative flex h-12 w-12 items-center justify-center rounded-full border border-[#D4AF37]/40 bg-[#0B0B0E] text-[#D4AF37] shadow-[0_10px_35px_rgba(0,0,0,0.5)] transition-all duration-300 hover:scale-110 hover:bg-[#D4AF37] hover:text-black"
+              >
+                <MessageCircle :size="21" />
+
+                <span
+                  class="pointer-events-none absolute right-16 whitespace-nowrap rounded-lg border border-white/10 bg-[#111114] px-3 py-2 text-[10px] font-medium text-white opacity-0 shadow-xl transition-all duration-300 group-hover:opacity-100"
+                >
+                  Chat on WhatsApp
+                </span>
+              </a>
+
+              <!-- Call -->
+              <a
+                href="tel:+919155161786"
+                aria-label="Call us"
+                class="group relative flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-[#0B0B0E] text-white shadow-[0_10px_35px_rgba(0,0,0,0.5)] transition-all duration-300 hover:scale-110 hover:border-[#D4AF37]/50 hover:text-[#D4AF37]"
+              >
+                <Phone :size="20" />
+
+                <span
+                  class="pointer-events-none absolute right-16 whitespace-nowrap rounded-lg border border-white/10 bg-[#111114] px-3 py-2 text-[10px] font-medium text-white opacity-0 shadow-xl transition-all duration-300 group-hover:opacity-100"
+                >
+                  Call +91 91551 61786
+                </span>
+              </a>
+            </div>
+          </div>
 
           <!-- CTA -->
           <RouterLink
@@ -170,9 +223,13 @@ import { ArrowUpRight, Linkedin, Github, Mail, Instagram } from 'lucide-vue-next
 
         <!-- Legal -->
         <div class="flex items-center gap-6">
-          <RouterLink to="/privacy" class="transition hover:text-zinc-300"> Privacy </RouterLink>
+          <RouterLink to="/privacy-policy" class="transition hover:text-zinc-300">
+            Privacy
+          </RouterLink>
 
-          <RouterLink to="/terms" class="transition hover:text-zinc-300"> Terms </RouterLink>
+          <RouterLink to="/terms-and-conditions" class="transition hover:text-zinc-300">
+            Terms
+          </RouterLink>
         </div>
       </div>
     </div>

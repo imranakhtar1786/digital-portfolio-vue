@@ -55,7 +55,7 @@ const projectTypes = [
     short: 'Landing',
     baseUsd: 79,
     baseInr: 5999,
-    desc: 'Modern responsive website or portfolio.',
+    desc: 'Modern website or portfolio. Standard scope includes up to 5–8 pages; extra pages and advanced features increase the final cost.',
     icon: Globe,
   },
   {
@@ -64,7 +64,7 @@ const projectTypes = [
     short: 'Web App',
     baseUsd: 149,
     baseInr: 11999,
-    desc: 'Full-stack application with backend.',
+    desc: 'Custom full-stack web application. Final cost depends on features, pages, user roles, APIs, payments, and complexity.',
     icon: ShoppingCart,
   },
   {
@@ -73,7 +73,7 @@ const projectTypes = [
     short: 'Mobile',
     baseUsd: 199,
     baseInr: 14999,
-    desc: 'Cross-platform iOS & Android app.',
+    desc: 'Android & iOS app. Final cost depends on screens, features, APIs, and complexity.',
     icon: Smartphone,
   },
   {
@@ -82,7 +82,7 @@ const projectTypes = [
     short: 'Cloud',
     baseUsd: 89,
     baseInr: 6999,
-    desc: 'VPS, Nginx, deployment & migration.',
+    desc: 'VPS setup, deployment, migration, and server configuration. Final cost depends on infrastructure and migration complexity.',
     icon: Server,
   },
 ]
