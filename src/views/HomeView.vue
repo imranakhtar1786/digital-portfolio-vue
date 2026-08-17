@@ -12,6 +12,7 @@ import Philosophy from '@/components/home/Philosophy.vue'
 import ContactSection from '@/components/home/ContactSection.vue'
 import CostEstimatorModal from '@/components/home/CostEstimatorModal.vue'
 import Footer from '@/components/layout/Footer.vue'
+import { motion } from 'motion-v'
 
 const isEstimatorOpen = ref(false)
 const isContactOpen = ref(false)
@@ -92,11 +93,20 @@ const process = [
         class="relative overflow-hidden border-y border-white/10 bg-[#06060A] py-20 text-white sm:py-28"
       >
         <!-- Ambient Background -->
-        <div
+        <motion.div
           class="pointer-events-none absolute left-1/2 top-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#D4AF37]/[0.035] blur-[150px]"
-        ></div>
+          :animate="{
+            scale: [1, 1.12, 1],
+            opacity: [0.6, 1, 0.6],
+          }"
+          :transition="{
+            duration: 6,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }"
+        />
 
-        <!-- Grid Background -->
+        <!-- Grid -->
         <div
           class="pointer-events-none absolute inset-0 opacity-[0.035]"
           style="
@@ -105,94 +115,177 @@ const process = [
               linear-gradient(90deg, rgba(255, 255, 255, 0.4) 1px, transparent 1px);
             background-size: 50px 50px;
           "
-        ></div>
+        />
 
         <div class="relative z-10 mx-auto w-[90%] max-w-7xl">
           <!-- HEADER -->
-
-          <div class="mx-auto max-w-3xl text-center">
-            <div
+          <motion.div
+            class="mx-auto max-w-3xl text-center"
+            :initial="{ opacity: 0, y: 50 }"
+            :whileInView="{ opacity: 1, y: 0 }"
+            :transition="{
+              duration: 0.8,
+              ease: 'easeOut',
+            }"
+            :viewport="{ once: true, amount: 0.3 }"
+          >
+            <motion.div
               class="inline-flex items-center gap-3 text-xs font-mono uppercase tracking-[0.3em] text-[#D4AF37]"
+              :initial="{ opacity: 0, y: 20 }"
+              :whileInView="{ opacity: 1, y: 0 }"
+              :transition="{ duration: 0.6, delay: 0.1 }"
+              :viewport="{ once: true }"
             >
               <Sparkles :size="14" />
 
               <span>Our Operating System</span>
-            </div>
+            </motion.div>
 
             <h2
               class="mt-5 text-4xl font-black uppercase leading-[0.9] tracking-[-0.055em] text-white sm:text-5xl lg:text-7xl"
             >
               From Idea
-              <span class="text-[#D4AF37]">To Impact.</span>
+              <motion.span
+                class="inline-block text-[#D4AF37]"
+                :initial="{ opacity: 0, x: 20 }"
+                :whileInView="{ opacity: 1, x: 0 }"
+                :transition="{ duration: 0.7, delay: 0.25 }"
+                :viewport="{ once: true }"
+              >
+                To Impact.
+              </motion.span>
             </h2>
 
             <p class="mx-auto mt-6 max-w-2xl text-sm leading-relaxed text-zinc-500 sm:text-base">
               A structured process that transforms an idea into a scalable, high-performance digital
               product.
             </p>
-          </div>
+          </motion.div>
 
           <!-- PIPELINE -->
-
           <div class="relative mt-16 lg:mt-24">
-            <!-- DESKTOP CONNECTION LINE -->
+            <!-- Desktop Line -->
+            <motion.div
+              class="absolute left-[12%] right-[12%] top-[52px] hidden h-px origin-left bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-transparent lg:block"
+              :initial="{ scaleX: 0 }"
+              :whileInView="{ scaleX: 1 }"
+              :transition="{
+                duration: 1.5,
+                delay: 0.3,
+                ease: 'easeInOut',
+              }"
+              :viewport="{ once: true }"
+            />
 
-            <div
-              class="absolute left-[12%] right-[12%] top-[52px] hidden h-px bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-transparent lg:block"
-            ></div>
-
-            <!-- GOLD GLOW LINE -->
-
-            <div
-              class="absolute left-[12%] right-[12%] top-[51px] hidden h-[3px] bg-[#D4AF37]/10 blur-md lg:block"
-            ></div>
+            <!-- Glow Line -->
+            <motion.div
+              class="absolute left-[12%] right-[12%] top-[51px] hidden h-[3px] origin-left bg-[#D4AF37]/10 blur-md lg:block"
+              :initial="{ scaleX: 0 }"
+              :whileInView="{ scaleX: 1 }"
+              :transition="{
+                duration: 1.8,
+                delay: 0.3,
+                ease: 'easeInOut',
+              }"
+              :viewport="{ once: true }"
+            />
 
             <!-- PROCESS GRID -->
-
             <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
-              <article v-for="(item, index) in process" :key="item.id" class="group relative">
-                <!-- Connection Arrow Desktop -->
-
-                <div
+              <motion.article
+                v-for="(item, index) in process"
+                :key="item.id"
+                class="group relative"
+                :initial="{
+                  opacity: 0,
+                  y: 70,
+                  scale: 0.94,
+                }"
+                :whileInView="{
+                  opacity: 1,
+                  y: 0,
+                  scale: 1,
+                }"
+                :whileHover="{
+                  y: -10,
+                }"
+                :transition="{
+                  duration: 0.7,
+                  delay: index * 0.15,
+                  ease: 'easeOut',
+                }"
+                :viewport="{
+                  once: true,
+                  amount: 0.2,
+                }"
+              >
+                <!-- Arrow -->
+                <motion.div
                   v-if="index < process.length - 1"
                   class="absolute -right-4 top-[43px] z-20 hidden h-5 w-5 items-center justify-center rounded-full border border-[#D4AF37]/30 bg-[#09090E] text-[#D4AF37] lg:flex"
+                  :initial="{
+                    opacity: 0,
+                    scale: 0,
+                  }"
+                  :whileInView="{
+                    opacity: 1,
+                    scale: 1,
+                  }"
+                  :transition="{
+                    duration: 0.4,
+                    delay: 0.6 + index * 0.15,
+                    type: 'spring',
+                    stiffness: 300,
+                  }"
+                  :viewport="{ once: true }"
                 >
                   <ArrowRight :size="11" />
-                </div>
+                </motion.div>
 
-                <!-- Card -->
-
+                <!-- CARD -->
                 <div
-                  class="relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#09090E] p-6 transition-all duration-500 hover:-translate-y-2 hover:border-[#D4AF37]/50 hover:shadow-[0_20px_60px_rgba(212,175,55,0.12)]"
+                  class="relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#09090E] p-6 transition-colors duration-500 group-hover:border-[#D4AF37]/50 group-hover:shadow-[0_20px_60px_rgba(212,175,55,0.12)]"
                 >
                   <!-- Background Number -->
-
-                  <span
-                    class="pointer-events-none absolute -right-2 -top-8 select-none text-[8rem] font-black leading-none text-white/[0.025] transition-colors duration-500 group-hover:text-[#D4AF37]/[0.04]"
+                  <motion.span
+                    class="pointer-events-none absolute -right-2 -top-8 select-none text-[8rem] font-black leading-none text-white/[0.025]"
+                    :whileHover="{
+                      x: -8,
+                      y: 5,
+                      scale: 1.05,
+                    }"
+                    :transition="{
+                      duration: 0.4,
+                    }"
                   >
                     {{ item.id }}
-                  </span>
+                  </motion.span>
 
                   <!-- TOP -->
-
                   <div class="relative flex items-start justify-between">
-                    <!-- Icon -->
-
-                    <div
-                      class="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#D4AF37]/30 bg-[#D4AF37]/[0.06] text-[#D4AF37] transition-all duration-500 group-hover:scale-110 group-hover:border-[#D4AF37]/70 group-hover:bg-[#D4AF37]/10"
+                    <!-- ICON -->
+                    <motion.div
+                      class="flex h-14 w-14 items-center justify-center rounded-2xl border border-[#D4AF37]/30 bg-[#D4AF37]/[0.06] text-[#D4AF37]"
+                      :whileHover="{
+                        scale: 1.12,
+                        rotate: 6,
+                      }"
+                      :transition="{
+                        type: 'spring',
+                        stiffness: 300,
+                        damping: 15,
+                      }"
                     >
                       <component :is="item.icon" :size="24" />
-                    </div>
+                    </motion.div>
 
-                    <!-- Number -->
-
+                    <!-- NUMBER -->
                     <span class="font-mono text-[10px] tracking-widest text-[#D4AF37]/60">
                       STEP / {{ item.id }}
                     </span>
                   </div>
 
                   <!-- CONTENT -->
-
                   <div class="relative mt-8">
                     <p class="text-[10px] font-mono uppercase tracking-[0.2em] text-[#D4AF37]/70">
                       {{ item.subtitle }}
@@ -212,37 +305,68 @@ const process = [
                   </div>
 
                   <!-- TAGS -->
-
                   <div class="relative mt-8 flex flex-wrap gap-2 border-t border-white/5 pt-5">
-                    <span
+                    <motion.span
                       v-for="tag in item.tags"
                       :key="tag"
                       class="rounded-md border border-white/5 bg-white/[0.02] px-2 py-1 text-[9px] font-mono uppercase tracking-wide text-zinc-500 transition-colors duration-300 group-hover:border-[#D4AF37]/20 group-hover:text-zinc-400"
+                      :initial="{ opacity: 0, y: 8 }"
+                      :whileInView="{ opacity: 1, y: 0 }"
+                      :transition="{
+                        duration: 0.4,
+                        delay: 0.5 + index * 0.15,
+                      }"
+                      :viewport="{ once: true }"
                     >
                       {{ tag }}
-                    </span>
+                    </motion.span>
                   </div>
                 </div>
-              </article>
+              </motion.article>
             </div>
           </div>
 
           <!-- FINAL RESULT -->
-
-          <div
+          <motion.div
+            ref="processResult"
             class="relative mt-12 overflow-hidden rounded-3xl border border-[#D4AF37]/20 bg-[#09090E] p-6 sm:mt-16 sm:p-8 lg:p-10"
+            :initial="{
+              opacity: 0,
+              y: 70,
+              scale: 0.96,
+            }"
+            :whileInView="{
+              opacity: 1,
+              y: 0,
+              scale: 1,
+            }"
+            :transition="{
+              duration: 0.9,
+              ease: 'easeOut',
+            }"
+            :viewport="{
+              once: true,
+              amount: 0.2,
+            }"
           >
-            <!-- Background -->
-
-            <div
+            <!-- Background Glow -->
+            <motion.div
               class="pointer-events-none absolute right-0 top-1/2 h-60 w-60 -translate-y-1/2 rounded-full bg-[#D4AF37]/10 blur-[90px]"
-            ></div>
+              :animate="{
+                x: [-20, 20, -20],
+                scale: [1, 1.1, 1],
+              }"
+              :transition="{
+                duration: 5,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }"
+            />
 
             <div
               class="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between"
             >
-              <!-- Left -->
-
+              <!-- LEFT -->
               <div>
                 <div
                   class="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.25em] text-[#D4AF37]"
@@ -265,35 +389,58 @@ const process = [
                 </p>
               </div>
 
-              <!-- Right Pipeline Result -->
-
+              <!-- PIPELINE RESULT -->
               <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-                <!-- Input -->
-
-                <div class="rounded-xl border border-white/10 bg-black/20 px-5 py-4">
+                <!-- INPUT -->
+                <motion.div
+                  class="rounded-xl border border-white/10 bg-black/20 px-5 py-4"
+                  :whileHover="{
+                    y: -4,
+                    borderColor: 'rgba(255,255,255,0.2)',
+                  }"
+                >
                   <p class="text-[9px] font-mono uppercase tracking-widest text-zinc-600">Input</p>
 
                   <p class="mt-1 text-sm font-bold text-white">Your Vision</p>
-                </div>
+                </motion.div>
 
                 <!-- Arrow -->
+                <motion.div
+                  class="hidden text-[#D4AF37] sm:block"
+                  :animate="{
+                    x: [-3, 3, -3],
+                  }"
+                  :transition="{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: 'easeInOut',
+                  }"
+                >
+                  <ArrowRight :size="20" />
+                </motion.div>
 
-                <ArrowRight :size="20" class="hidden text-[#D4AF37] sm:block" />
-
-                <!-- Output -->
-
-                <div
+                <!-- OUTPUT -->
+                <motion.div
                   class="rounded-xl border border-[#D4AF37]/40 bg-[#D4AF37]/[0.06] px-5 py-4 shadow-[0_0_30px_rgba(212,175,55,0.08)]"
+                  :whileHover="{
+                    y: -5,
+                    scale: 1.03,
+                  }"
+                  :transition="{
+                    type: 'spring',
+                    stiffness: 300,
+                    damping: 18,
+                  }"
                 >
                   <p class="text-[9px] font-mono uppercase tracking-widest text-[#D4AF37]/70">
                     Output
                   </p>
 
                   <p class="mt-1 text-sm font-bold text-[#FCF6BA]">Digital Product</p>
-                </div>
+                </motion.div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
       <Philosophy />
