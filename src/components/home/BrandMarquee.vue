@@ -1,36 +1,78 @@
 <script setup>
-const brands = [
-  'AETHERIA CAPITAL',
-  'SOLARIS HOROLOGY',
-  'HYPERION MOTORS',
-  'VALENCE LABS',
-  'AURA LUXURY',
-  'VERTEX GLOBAL',
-  'LUMINARY SPATIAL',
-  'NOVA VENTURES'
+const services = [
+  'WEB DEVELOPMENT',
+  'MOBILE APPLICATIONS',
+  'CUSTOM SOFTWARE',
+  'AI & AUTOMATION',
+  'ECOMMERCE',
+  'UI/UX DESIGN',
+  'CLOUD SOLUTIONS',
+  'DIGITAL PRODUCTS',
 ]
+
+// Duplicate once for a seamless infinite loop
+const marqueeServices = [...services, ...services]
 </script>
 
 <template>
-  <div class="relative w-full border-y border-white/10 bg-[#050507] py-6 overflow-hidden select-none">
-    <!-- Gradient Fade Edges -->
-    <div class="pointer-events-none absolute left-0 top-0 z-10 h-full w-24 bg-gradient-to-r from-[#030303] to-transparent"></div>
-    <div class="pointer-events-none absolute right-0 top-0 z-10 h-full w-24 bg-gradient-to-l from-[#030303] to-transparent"></div>
+  <section
+    class="relative w-full overflow-hidden border-y border-white/10 bg-[#050507] py-5 select-none"
+  >
+    <!-- Left gradient fade -->
+    <div
+      class="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-[#050507] to-transparent sm:w-28"
+    />
 
-    <div class="flex w-max animate-[marquee_25s_linear_infinite] items-center gap-16">
-      <div v-for="(brand, idx) in [...brands, ...brands, ...brands]" :key="idx" class="flex items-center gap-16">
-        <span class="text-sm font-extrabold tracking-[0.35em] text-zinc-500 transition-colors duration-300 hover:text-[#D4AF37]">
-          {{ brand }}
+    <!-- Right gradient fade -->
+    <div
+      class="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-[#050507] to-transparent sm:w-28"
+    />
+
+    <!-- Infinite scrolling content -->
+    <div class="marquee flex w-max items-center">
+      <div
+        v-for="(service, index) in marqueeServices"
+        :key="`${service}-${index}`"
+        class="flex shrink-0 items-center"
+      >
+        <span
+          class="whitespace-nowrap px-6 text-[10px] font-bold tracking-[0.22em] text-zinc-500 transition-colors duration-300 hover:text-[#D4AF37] sm:px-10 sm:text-xs sm:tracking-[0.3em]"
+        >
+          {{ service }}
         </span>
-        <span class="h-1.5 w-1.5 rounded-full bg-[#D4AF37]/40"></span>
+
+        <!-- Separator -->
+        <span
+          class="h-1.5 w-1.5 shrink-0 rounded-full bg-[#D4AF37]/60 shadow-[0_0_10px_rgba(212,175,55,0.5)]"
+        />
       </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <style scoped>
+.marquee {
+  animation: marquee 35s linear infinite;
+  will-change: transform;
+}
+
+.marquee:hover {
+  animation-play-state: paused;
+}
+
 @keyframes marquee {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-33.333%); }
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee {
+    animation: none;
+  }
 }
 </style>

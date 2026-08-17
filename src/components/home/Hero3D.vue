@@ -1,353 +1,370 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
-import {
-  ArrowUpRight,
-  Sparkles,
-  Shield,
-  Cpu,
-  Code2,
-  UserCheck,
-  DollarSign,
-  IndianRupee,
-} from 'lucide-vue-next'
-import { currentCurrency, formatCurrency } from '@/stores/currencyStore.js'
+import { ArrowUpRight, Sparkles, Layers3, Code2, Database, Activity, Play } from 'lucide-vue-next'
 
-const emit = defineEmits(['open-estimator', 'open-contact'])
+const emit = defineEmits(['open-estimator'])
 
-const canvasRef = ref(null)
-let animationFrameId = null
+const heroRef = ref(null)
 
-const metrics = [
-  { value: '11+', label: 'Production Apps Live', sub: 'E-Com, Real Estate & SaaS' },
-  { value: '₹5,999', label: 'Services Starting Rate', sub: 'Transparent & Affordable' },
-  { value: '100%', label: 'Source Code IP Ownership', sub: 'GitHub Repository Handover' },
-  { value: '99.4%', label: 'Client Retention Rate', sub: 'Direct Founder Engineering' },
-]
+const mouse = ref({
+  x: 0,
+  y: 0,
+})
 
-// Golden Orbital Rings — a glowing wireframe sphere-like structure made of
-// elliptical orbit rings that slowly rotate in 3D-ish perspective, with
-// particles traveling along the rings like satellites. Reacts subtly to
-// mouse position (parallax tilt). This is a much stronger "premium tech
-// brand" visual than flat particles — reads instantly as high production
-// value at hero size.
+const smooth = ref({
+  x: 0,
+  y: 0,
+})
+
+let frame
+
+const handleMouseMove = (event) => {
+  if (!heroRef.value) return
+
+  const rect = heroRef.value.getBoundingClientRect()
+
+  mouse.value = {
+    x: ((event.clientX - rect.left) / rect.width - 0.5) * 2,
+    y: ((event.clientY - rect.top) / rect.height - 0.5) * 2,
+  }
+}
+
+const resetMouse = () => {
+  mouse.value = {
+    x: 0,
+    y: 0,
+  }
+}
+
+const animate = () => {
+  smooth.value.x += (mouse.value.x - smooth.value.x) * 0.06
+  smooth.value.y += (mouse.value.y - smooth.value.y) * 0.06
+
+  frame = requestAnimationFrame(animate)
+}
+
+const parallax = (x = 10, y = 10) => ({
+  transform: `translate3d(
+    ${smooth.value.x * x}px,
+    ${smooth.value.y * y}px,
+    0
+  )`,
+})
 
 onMounted(() => {
-  const canvas = canvasRef.value
-  if (!canvas) return
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return
-
-  let width = (canvas.width = canvas.parentElement.offsetWidth)
-  let height = (canvas.height = canvas.parentElement.offsetHeight)
-
-  const handleResize = () => {
-    if (!canvas || !canvas.parentElement) return
-    width = canvas.width = canvas.parentElement.offsetWidth
-    height = canvas.height = canvas.parentElement.offsetHeight
-  }
-  window.addEventListener('resize', handleResize)
-
-  // Core sits right-of-center, matching your original layout weighting
-  let coreX = width * 0.72
-  let coreY = height * 0.42
-  let targetTiltX = 0
-  let targetTiltY = 0
-  let tiltX = 0
-  let tiltY = 0
-
-  const handleMouseMove = (e) => {
-    const rect = canvas.getBoundingClientRect()
-    const mx = e.clientX - rect.left
-    const my = e.clientY - rect.top
-    // Normalize to -1..1 relative to core, small range so it stays subtle
-    targetTiltX = ((mx - coreX) / width) * 0.6
-    targetTiltY = ((my - coreY) / height) * 0.6
-  }
   window.addEventListener('mousemove', handleMouseMove)
+  window.addEventListener('mouseleave', resetMouse)
 
-  // ── Orbit rings ──
-  // Each ring: radiusX, radiusY (ellipse = perspective), tilt angle, speed,
-  // color, particle count riding along it.
-  const baseRadius = Math.min(width, height) * 0.16
-  const rings = [
-    {
-      rx: baseRadius * 1.0,
-      ry: baseRadius * 0.32,
-      tilt: 0.15,
-      speed: 0.006,
-      color: '#D4AF37',
-      particles: 3,
-    },
-    {
-      rx: baseRadius * 1.5,
-      ry: baseRadius * 0.5,
-      tilt: -0.25,
-      speed: -0.0045,
-      color: '#FCF6BA',
-      particles: 4,
-    },
-    {
-      rx: baseRadius * 2.05,
-      ry: baseRadius * 0.65,
-      tilt: 0.35,
-      speed: 0.0032,
-      color: '#BF953F',
-      particles: 5,
-    },
-    {
-      rx: baseRadius * 2.6,
-      ry: baseRadius * 0.85,
-      tilt: -0.1,
-      speed: -0.0022,
-      color: '#D4AF37',
-      particles: 6,
-    },
-  ]
+  frame = requestAnimationFrame(animate)
+})
 
-  // Precompute particle phase offsets per ring
-  rings.forEach((r) => {
-    r.particlePhases = Array.from(
-      { length: r.particles },
-      (_, i) => (i / r.particles) * Math.PI * 2,
-    )
-  })
+onUnmounted(() => {
+  window.removeEventListener('mousemove', handleMouseMove)
+  window.removeEventListener('mouseleave', resetMouse)
 
-  // ── Distant background stars (static-ish, very subtle) ──
-  const bgStars = []
-  const BG_COUNT = 90
-  for (let i = 0; i < BG_COUNT; i++) {
-    bgStars.push({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      size: Math.random() * 1.2 + 0.3,
-      alpha: Math.random() * 0.4 + 0.15,
-      twinklePhase: Math.random() * Math.PI * 2,
-      twinkleSpeed: Math.random() * 0.02 + 0.005,
-    })
-  }
-
-  let rotation = 0
-  let animationFrameId = null
-
-  const drawRing = (r, globalTiltX, globalTiltY) => {
-    // Draw the ring path itself (faint ellipse, rotated by r.tilt + global sway)
-    const effectiveTiltY = r.ry * (1 + globalTiltY * 0.3)
-    const angleOffset = r.tilt + globalTiltX * 0.4
-
-    ctx.save()
-    ctx.translate(coreX, coreY)
-    ctx.rotate(angleOffset)
-    ctx.beginPath()
-    ctx.ellipse(0, 0, r.rx, effectiveTiltY, 0, 0, Math.PI * 2)
-    ctx.strokeStyle = hexToRgba(r.color, 0.22)
-    ctx.lineWidth = 1
-    ctx.shadowBlur = 6
-    ctx.shadowColor = r.color
-    ctx.stroke()
-    ctx.shadowBlur = 0
-    ctx.restore()
-
-    // Particles riding the ring
-    for (let i = 0; i < r.particles; i++) {
-      const phase = r.particlePhases[i] + rotation * r.speed * 40
-      const localX = Math.cos(phase) * r.rx
-      const localY = Math.sin(phase) * effectiveTiltY
-
-      // Apply ring rotation transform manually to get world coords
-      const cosA = Math.cos(angleOffset)
-      const sinA = Math.sin(angleOffset)
-      const worldX = coreX + localX * cosA - localY * sinA
-      const worldY = coreY + localX * sinA + localY * cosA
-
-      // Depth cue: particles "behind" (sin phase negative-ish) are dimmer/smaller
-      const depth = (Math.sin(phase) + 1) / 2 // 0..1
-      const size = 1.1 + depth * 1.6
-      const alpha = 0.35 + depth * 0.65
-
-      ctx.beginPath()
-      ctx.arc(worldX, worldY, size, 0, Math.PI * 2)
-      ctx.fillStyle = r.color
-      ctx.globalAlpha = alpha
-      ctx.shadowBlur = 10
-      ctx.shadowColor = r.color
-      ctx.fill()
-      ctx.globalAlpha = 1
-      ctx.shadowBlur = 0
-    }
-  }
-
-  function hexToRgba(hex, alpha) {
-    const bigint = parseInt(hex.replace('#', ''), 16)
-    const rr = (bigint >> 16) & 255
-    const gg = (bigint >> 8) & 255
-    const bb = bigint & 255
-    return `rgba(${rr}, ${gg}, ${bb}, ${alpha})`
-  }
-
-  const render = () => {
-    ctx.clearRect(0, 0, width, height)
-
-    // Background stars, gentle twinkle
-    for (const s of bgStars) {
-      s.twinklePhase += s.twinkleSpeed
-      const tw = 0.5 + Math.sin(s.twinklePhase) * 0.5
-      ctx.beginPath()
-      ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2)
-      ctx.fillStyle = `rgba(255, 250, 230, ${s.alpha * tw})`
-      ctx.fill()
-    }
-
-    // Smooth tilt easing toward mouse-driven target
-    tiltX += (targetTiltX - tiltX) * 0.04
-    tiltY += (targetTiltY - tiltY) * 0.04
-
-    rotation += 1
-
-    // Core glow
-    const coreGlow = ctx.createRadialGradient(coreX, coreY, 2, coreX, coreY, baseRadius * 1.4)
-    coreGlow.addColorStop(0, 'rgba(252, 246, 186, 0.9)')
-    coreGlow.addColorStop(0.25, 'rgba(212, 175, 55, 0.35)')
-    coreGlow.addColorStop(1, 'rgba(212, 175, 55, 0)')
-    ctx.fillStyle = coreGlow
-    ctx.beginPath()
-    ctx.arc(coreX, coreY, baseRadius * 1.4, 0, Math.PI * 2)
-    ctx.fill()
-
-    // Solid core
-    ctx.beginPath()
-    ctx.arc(coreX, coreY, 5, 0, Math.PI * 2)
-    ctx.fillStyle = '#FCF6BA'
-    ctx.shadowBlur = 20
-    ctx.shadowColor = '#D4AF37'
-    ctx.fill()
-    ctx.shadowBlur = 0
-
-    // Rings back-to-front (largest first so smaller/inner rings render on top)
-    for (let i = rings.length - 1; i >= 0; i--) {
-      drawRing(rings[i], tiltX, tiltY)
-    }
-
-    animationFrameId = requestAnimationFrame(render)
-  }
-
-  render()
-
-  onUnmounted(() => {
-    window.removeEventListener('resize', handleResize)
-    window.removeEventListener('mousemove', handleMouseMove)
-    if (animationFrameId) cancelAnimationFrame(animationFrameId)
-  })
+  cancelAnimationFrame(frame)
 })
 </script>
 
 <template>
-  <section
-    id="home"
-    class="relative flex min-h-screen w-full flex-col justify-between overflow-hidden pt-28 pb-16 bg-[#020204]"
-  >
-    <!-- Cosmic Nebula Radial Glow Orbs -->
-    <div
-      class="pointer-events-none absolute right-[15%] top-[15%] h-[600px] w-[600px] rounded-full bg-radial from-[#D4AF37]/20 via-[#BF953F]/5 to-transparent blur-[170px]"
-    ></div>
-    <div
-      class="pointer-events-none absolute left-[5%] bottom-[10%] h-[450px] w-[450px] rounded-full bg-radial from-[#D4AF37]/12 via-transparent to-transparent blur-[150px]"
-    ></div>
+  <section ref="heroRef" class="relative isolate overflow-hidden bg-[#050505] text-white">
+    <!-- ================= BACKGROUND ================= -->
 
-    <!-- Golden Particle Constellation Canvas -->
-    <div class="absolute inset-0 z-0">
-      <canvas ref="canvasRef" class="h-full w-full opacity-90"></canvas>
+    <div class="pointer-events-none absolute inset-0">
+      <!-- Gold glow -->
+
       <div
-        class="pointer-events-none absolute inset-0 bg-radial from-transparent via-[#020204]/60 to-[#020204]"
-      ></div>
+        class="absolute left-1/2 top-[42%] h-[55vw] w-[55vw] max-h-[700px] max-w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#D4AF37]/[0.045] blur-[130px]"
+      />
+
+      <!-- Grid -->
+
+      <div
+        class="absolute inset-0 opacity-[0.12]"
+        style="
+          background-image:
+            linear-gradient(rgba(212, 175, 55, 0.08) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(212, 175, 55, 0.08) 1px, transparent 1px);
+          background-size: 64px 64px;
+        "
+      />
+
+      <!-- Vignette -->
+
+      <div
+        class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_15%,#050505_82%)]"
+      />
     </div>
 
-    <!-- Main Content Container -->
-    <div class="relative z-10 mx-auto my-auto w-[90%] max-w-7xl">
-      <div class="flex flex-col items-start gap-8">
-        <!-- Status & Founder Pill -->
-        <div class="flex flex-wrap items-center gap-3">
+    <!-- ================= HEADER ================= -->
+
+    <header
+      class="relative z-30 mx-auto flex h-16 w-[92%] max-w-[1400px] items-center justify-between border-b border-white/10 lg:h-[72px]"
+    ></header>
+
+    <!-- ================= HERO ================= -->
+
+    <div class="relative z-10 mx-auto flex w-[92%] max-w-[1400px] items-center">
+      <!--
+        SAFE CANVAS
+
+        Mobile:
+        Natural height
+
+        Desktop:
+        Fits remaining viewport
+      -->
+
+      <div
+        class="relative flex w-full items-center justify-center py-20 lg:h-[calc(100svh-128px)] lg:min-h-[600px] lg:max-h-[900px] lg:py-0"
+      >
+        <!-- ================= CENTER CONTENT ================= -->
+
+        <div class="relative z-20 flex w-full max-w-[780px] flex-col items-center text-center">
+          <!-- LABEL -->
+
           <div
-            class="inline-flex items-center gap-2.5 rounded-full border border-[#D4AF37]/50 bg-[#12110D]/85 px-4 py-2 backdrop-blur-2xl shadow-xl"
+            class="mb-6 inline-flex items-center gap-2 border border-[#D4AF37]/30 bg-[#D4AF37]/5 px-3 py-2 backdrop-blur-md"
           >
-            <span class="relative flex h-2 w-2">
-              <span
-                class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#D4AF37] opacity-75"
-              ></span>
-              <span class="relative inline-flex h-2 w-2 rounded-full bg-[#D4AF37]"></span>
-            </span>
-            <span class="text-xs uppercase tracking-[0.2em] text-[#FCF6BA] font-mono font-bold">
-              FOUNDED BY IMRAN AKHTAR // IMRANOS
+            <Sparkles :size="12" class="text-[#D4AF37]" />
+
+            <span
+              class="font-mono text-[8px] uppercase tracking-[0.2em] text-[#D4AF37] sm:text-[9px]"
+            >
+              Independent Digital Studio
             </span>
           </div>
 
-          <div
-            class="inline-flex items-center gap-2 rounded-full border border-green-500/40 bg-[#0A140E]/85 px-4 py-2 text-xs font-mono text-green-400 backdrop-blur-2xl"
-          >
-            <Sparkles :size="13" class="text-green-400" />
-            <span>SERVICES START FROM ₹5,999 ($79 USD)</span>
-          </div>
-        </div>
+          <!-- HEADING -->
 
-        <!-- Headline -->
-        <div class="max-w-4xl">
           <h1
-            class="text-4xl font-extrabold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl leading-[1.05] uppercase"
+            class="text-[clamp(3rem,6vw,6.7rem)] font-black uppercase leading-[0.88] tracking-[-0.065em]"
           >
-            <span class="block text-white">Full-Stack Digital</span>
-            <span class="block text-gold-gradient">Solutions & Code.</span>
+            <span class="block"> Your Idea </span>
+
+            <span class="block"> Deserves More </span>
+
+            <span class="block"> Than A Template. </span>
           </h1>
 
+          <!-- DESCRIPTION -->
+
           <p
-            class="mt-6 text-sm text-zinc-300 sm:text-base md:text-lg font-light leading-relaxed max-w-2xl"
+            class="mt-6 max-w-[570px] px-3 text-sm leading-relaxed text-zinc-400 sm:px-0 lg:text-[15px]"
           >
-            Direct full-stack software development, responsive web applications, and DevOps server
-            migrations by <strong class="text-white">Imran Akhtar</strong>. Agency-grade quality at
-            accessible freelancer pricing.
+            We transform ambitious ideas into refined digital products — websites, applications and
+            systems built specifically around your business.
           </p>
+
+          <!-- ACTIONS -->
+
+          <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <RouterLink
+              to="/pricing"
+              class="group inline-flex items-center gap-3 bg-[#D4AF37] px-6 py-3.5 text-[10px] font-black uppercase tracking-[0.16em] text-black transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_15px_50px_rgba(212,175,55,.28)]"
+            >
+              Start A Project
+
+              <ArrowUpRight
+                :size="15"
+                class="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
+              />
+            </RouterLink>
+
+            <button
+              type="button"
+              @click="emit('open-estimator')"
+              class="group inline-flex items-center gap-3 border border-white/15 bg-white/[0.03] px-6 py-3.5 text-[10px] font-bold uppercase tracking-[0.16em] text-zinc-300 backdrop-blur-md transition-all duration-300 hover:border-[#D4AF37]/50 hover:bg-[#D4AF37]/5"
+            >
+              <span class="flex h-5 w-5 items-center justify-center border border-[#D4AF37]/40">
+                <Play :size="9" class="ml-[1px] text-[#D4AF37]" />
+              </span>
+
+              Estimate Project
+            </button>
+          </div>
+
+          <!-- SERVICES -->
+
+          <div
+            class="mt-8 flex flex-wrap justify-center gap-x-4 gap-y-2 font-mono text-[7px] uppercase tracking-[0.16em] text-zinc-600 sm:text-[8px]"
+          >
+            <span>Strategy</span>
+
+            <span class="text-[#D4AF37]/60"> / </span>
+
+            <span>Design</span>
+
+            <span class="text-[#D4AF37]/60"> / </span>
+
+            <span>Engineering</span>
+          </div>
         </div>
 
-        <!-- Action CTA Buttons -->
-        <div class="flex flex-wrap items-center gap-4 pt-2">
-          <RouterLink
-            to="/pricing"
-            class="group relative inline-flex items-center justify-center overflow-hidden rounded-2xl border border-[#D4AF37] bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] px-7 py-4 text-xs font-extrabold uppercase tracking-[0.2em] text-black transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_rgba(212,175,55,0.6)]"
+        <!-- ================================================= -->
+        <!-- FLOATING PRODUCT OBJECTS - DESKTOP ONLY -->
+        <!-- ================================================= -->
+
+        <!-- WEBSITE -->
+
+        <div
+          :style="parallax(-7, -4)"
+          class="absolute left-[2%] top-[10%] z-10 hidden w-[190px] rotate-[-5deg] transition-transform duration-100 lg:block xl:left-[4%] xl:top-[9%] xl:w-[250px]"
+        >
+          <div
+            class="overflow-hidden border border-[#D4AF37]/30 bg-[#0A0A0A]/90 shadow-[0_30px_80px_rgba(0,0,0,.6)] backdrop-blur-xl"
           >
-            <span class="relative z-10 flex items-center gap-2">
-              <span>View Packages (From ₹5,999)</span>
-              <ArrowUpRight :size="16" />
+            <!-- Browser header -->
+
+            <div class="flex items-center gap-1.5 border-b border-white/10 px-3 py-2">
+              <span class="h-1.5 w-1.5 rounded-full bg-[#D4AF37]" />
+
+              <span class="h-1.5 w-1.5 rounded-full bg-white/20" />
+
+              <span class="h-1.5 w-1.5 rounded-full bg-white/10" />
+
+              <span class="ml-auto font-mono text-[6px] uppercase tracking-[0.18em] text-[#D4AF37]">
+                Website
+              </span>
+            </div>
+
+            <!-- Browser body -->
+
+            <div class="space-y-3 p-3 xl:p-4">
+              <div class="h-3 w-[65%] bg-[#D4AF37]/25" />
+
+              <div class="h-2 w-full bg-white/10" />
+
+              <div class="h-2 w-[72%] bg-white/5" />
+
+              <div class="grid grid-cols-2 gap-2">
+                <div class="h-12 border border-[#D4AF37]/20 bg-[#D4AF37]/5 xl:h-16" />
+
+                <div class="h-12 border border-[#D4AF37]/20 bg-[#D4AF37]/5 xl:h-16" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MOBILE APP -->
+
+        <div
+          :style="parallax(8, -5)"
+          class="absolute right-[3%] top-[10%] z-10 hidden rotate-[6deg] transition-transform duration-100 lg:block xl:right-[5%] xl:top-[8%]"
+        >
+          <div
+            class="w-[82px] border border-[#D4AF37]/40 bg-[#090909]/95 p-2 shadow-[0_30px_80px_rgba(0,0,0,.6)] backdrop-blur-xl xl:w-[115px]"
+          >
+            <div class="mx-auto mb-3 h-1 w-7 rounded-full bg-[#D4AF37]/40" />
+
+            <div class="space-y-2">
+              <div class="h-14 bg-gradient-to-br from-[#D4AF37]/20 to-transparent xl:h-20" />
+
+              <div class="h-2 w-[80%] bg-white/10" />
+
+              <div class="h-1.5 w-[55%] bg-white/5" />
+
+              <div class="grid grid-cols-2 gap-1.5">
+                <div class="h-6 bg-[#D4AF37]/15 xl:h-8" />
+
+                <div class="h-6 bg-white/5 xl:h-8" />
+              </div>
+            </div>
+
+            <p
+              class="mt-3 text-center font-mono text-[5px] uppercase tracking-[0.16em] text-[#D4AF37] xl:text-[7px]"
+            >
+              Mobile App
+            </p>
+          </div>
+        </div>
+
+        <!-- DATABASE -->
+
+        <div
+          :style="parallax(-8, 6)"
+          class="absolute bottom-[14%] left-[7%] z-10 hidden lg:block xl:left-[12%]"
+        >
+          <div
+            class="flex h-14 w-14 flex-col items-center justify-center border border-[#D4AF37]/30 bg-[#090909]/90 shadow-xl backdrop-blur-xl xl:h-16 xl:w-16"
+          >
+            <Database :size="14" class="text-[#D4AF37]" />
+
+            <span
+              class="mt-1 font-mono text-[5px] uppercase tracking-wider text-zinc-500 xl:text-[6px]"
+            >
+              Data
             </span>
-          </RouterLink>
-
-          <button
-            @click="emit('open-estimator')"
-            class="group flex items-center gap-2 rounded-2xl border border-white/15 bg-[#0C0C12]/90 px-7 py-4 text-xs font-bold uppercase tracking-[0.2em] text-zinc-200 backdrop-blur-2xl transition duration-300 hover:border-[#D4AF37]/50 hover:bg-[#14141E] hover:text-white"
-          >
-            <Sparkles :size="15" class="text-[#D4AF37]" />
-            <span>Cost Calculator</span>
-          </button>
+          </div>
         </div>
+
+        <!-- ANALYTICS -->
+
+        <div
+          :style="parallax(6, 7)"
+          class="absolute bottom-[12%] right-[3%] z-10 hidden w-[190px] rotate-[-4deg] lg:block xl:right-[6%] xl:w-[250px]"
+        >
+          <div
+            class="border border-[#D4AF37]/25 bg-[#090909]/90 p-3 shadow-[0_30px_80px_rgba(0,0,0,.6)] backdrop-blur-xl"
+          >
+            <div class="mb-3 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <Activity :size="12" class="text-[#D4AF37]" />
+
+                <span class="font-mono text-[7px] uppercase tracking-[0.15em] text-zinc-400">
+                  Growth
+                </span>
+              </div>
+
+              <span class="font-mono text-[7px] text-[#D4AF37]"> +24.8% </span>
+            </div>
+
+            <div class="flex h-16 items-end gap-1.5 xl:h-20">
+              <div class="h-[25%] flex-1 bg-[#D4AF37]/20" />
+              <div class="h-[45%] flex-1 bg-[#D4AF37]/30" />
+              <div class="h-[38%] flex-1 bg-[#D4AF37]/40" />
+              <div class="h-[68%] flex-1 bg-[#D4AF37]/60" />
+              <div class="h-[55%] flex-1 bg-[#D4AF37]/50" />
+              <div class="h-[92%] flex-1 bg-[#D4AF37]" />
+            </div>
+          </div>
+        </div>
+
+        <!-- API NODE -->
+
+        <div
+          :style="parallax(5, 4)"
+          class="absolute left-[3%] top-1/2 z-10 hidden -translate-y-1/2 xl:block"
+        >
+          <div
+            class="flex items-center gap-2 border border-[#D4AF37]/25 bg-[#090909]/90 px-3 py-2 backdrop-blur-xl"
+          >
+            <Code2 :size="13" class="text-[#D4AF37]" />
+
+            <div>
+              <p class="font-mono text-[7px] uppercase tracking-[0.15em] text-[#D4AF37]">API</p>
+
+              <p class="text-[7px] text-zinc-600">Connected</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- DECORATIVE NODES -->
+
+        <div
+          :style="parallax(4, -4)"
+          class="absolute left-[29%] top-[15%] hidden h-2 w-2 rotate-45 border border-[#D4AF37]/50 lg:block"
+        />
+
+        <div
+          :style="parallax(-4, 5)"
+          class="absolute bottom-[26%] right-[29%] hidden h-2 w-2 rounded-full bg-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,.7)] lg:block"
+        />
       </div>
     </div>
 
-    <!-- Live Metrics Grid -->
-    <div class="relative z-10 mx-auto w-[90%] max-w-7xl pt-12">
-      <div class="grid grid-cols-2 gap-4 border-t border-white/10 pt-8 md:grid-cols-4">
-        <div v-for="(metric, idx) in metrics" :key="idx" class="flex flex-col">
-          <span
-            class="text-2xl font-extrabold text-white sm:text-3xl font-mono"
-            :class="{ 'text-gold-gradient': idx === 1 }"
-          >
-            {{ metric.value }}
-          </span>
-          <span class="text-xs font-semibold uppercase tracking-wider text-[#D4AF37] mt-1">
-            {{ metric.label }}
-          </span>
-          <span class="text-[10px] text-zinc-500 font-mono mt-0.5">
-            {{ metric.sub }}
-          </span>
-        </div>
-      </div>
-    </div>
+    <!-- ================= FOOTER STATUS ================= -->
   </section>
+  <BrandMarquee />
 </template>

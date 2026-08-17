@@ -1,117 +1,180 @@
 <script setup>
-import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
-import { ArrowUpRight, Sparkles, Check, Send, Globe, Shield } from 'lucide-vue-next'
-
-const newsletterEmail = ref('')
-const isSubscribed = ref(false)
-
-const handleSubscribe = () => {
-  if (!newsletterEmail.value) return
-  isSubscribed.value = true
-  setTimeout(() => {
-    isSubscribed.value = false
-    newsletterEmail.value = ''
-  }, 4000)
-}
+import { ArrowUpRight, Linkedin, Github, Mail, Instagram } from 'lucide-vue-next'
 </script>
 
 <template>
-  <footer class="relative bg-[#020203] pt-20 pb-12 text-white border-t border-white/10 overflow-hidden">
-    <!-- Ambient Gold Glow -->
-    <div class="pointer-events-none absolute left-1/2 bottom-0 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-radial from-[#D4AF37]/10 via-transparent to-transparent blur-[140px]"></div>
+  <footer
+    class="relative overflow-hidden border-t border-white/10 bg-[#020203] pt-20 pb-10 text-white"
+  >
+    <!-- Subtle Ambient Glow -->
+    <div
+      class="pointer-events-none absolute bottom-0 left-1/2 h-[420px] w-[650px] -translate-x-1/2 rounded-full bg-[#D4AF37]/[0.06] blur-[150px]"
+    ></div>
 
-    <div class="mx-auto w-[90%] max-w-7xl relative z-10">
-      
-      <!-- Top Grid -->
-      <div class="grid gap-12 lg:grid-cols-[1.5fr_1fr_1fr]">
-        
-        <!-- Brand Info -->
-        <div>
-          <RouterLink to="/" class="flex items-center gap-3">
-            <div class="flex h-10 w-10 items-center justify-center rounded-xl border border-[#D4AF37]/40 bg-[#12121A]">
-              <span class="font-bold text-[#FCF6BA] text-lg">V</span>
+    <div class="relative z-10 mx-auto w-[90%] max-w-7xl">
+      <!-- ========================= -->
+      <!-- MAIN FOOTER -->
+      <!-- ========================= -->
+
+      <div class="grid gap-14 lg:grid-cols-[1.4fr_0.8fr_1fr]">
+        <!-- BRAND -->
+        <div class="max-w-md">
+          <RouterLink to="/" class="group inline-flex items-center gap-3">
+            <!-- Logo -->
+            <div
+              class="flex h-11 w-11 items-center justify-center rounded-xl border border-[#D4AF37]/40 bg-[#0B0B0F] transition duration-300 group-hover:border-[#D4AF37]/80"
+            >
+              <span class="text-lg font-black text-[#D4AF37]"> V </span>
             </div>
-            <div class="flex flex-col">
-              <span class="text-xl font-extrabold tracking-[0.18em] text-white">
+
+            <!-- Name -->
+            <div>
+              <div class="text-xl font-extrabold tracking-[0.16em] text-white">
                 VALENCE<span class="text-[#D4AF37]">.IN</span>
-              </span>
-              <span class="text-[9px] uppercase tracking-[0.2em] text-[#C8A45D]">FOUNDED BY IMRAN AKHTAR</span>
+              </div>
+
+              <div class="mt-0.5 text-[8px] uppercase tracking-[0.22em] text-zinc-600">
+                Digital Studio
+              </div>
             </div>
           </RouterLink>
 
-          <p class="mt-4 text-xs text-zinc-400 font-light leading-relaxed max-w-sm">
-            Crafting full-stack web applications, mobile apps, performance digital marketing, and server migrations at freelancer-friendly rates.
+          <p class="mt-7 max-w-sm text-sm font-light leading-7 text-zinc-500">
+            We turn ideas into thoughtful digital experiences — from high-performance websites to
+            custom software and scalable web applications.
           </p>
 
-          <!-- System Status Pill -->
-          <div class="mt-6 inline-flex items-center gap-2.5 rounded-full border border-green-500/30 bg-[#0E1510] px-3.5 py-1.5 text-[10px] font-mono text-green-400">
-            <span class="h-2 w-2 rounded-full bg-green-400 animate-pulse"></span>
-            <span>SYSTEMS OPERATIONAL // READY FOR HIRE</span>
+          <!-- Social Links -->
+          <div class="mt-7 flex items-center gap-3">
+            <a
+              href="#"
+              aria-label="LinkedIn"
+              class="group flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.02] transition hover:border-[#D4AF37]/40"
+            >
+              <Linkedin :size="15" class="text-zinc-500 transition group-hover:text-[#D4AF37]" />
+            </a>
+
+            <a
+              href="#"
+              aria-label="GitHub"
+              class="group flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.02] transition hover:border-[#D4AF37]/40"
+            >
+              <Github :size="15" class="text-zinc-500 transition group-hover:text-[#D4AF37]" />
+            </a>
+
+            <a
+              href="#"
+              aria-label="Instagram"
+              class="group flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.02] transition hover:border-[#D4AF37]/40"
+            >
+              <Instagram :size="15" class="text-zinc-500 transition group-hover:text-[#D4AF37]" />
+            </a>
           </div>
         </div>
 
-        <!-- Links Column -->
-        <div class="grid grid-cols-2 gap-8 text-xs">
-          <div>
-            <h4 class="font-semibold text-white uppercase tracking-widest text-[#D4AF37]">Explore</h4>
-            <ul class="mt-4 space-y-2.5 text-zinc-400">
-              <li><RouterLink to="/about" class="hover:text-white transition">About Imran</RouterLink></li>
-              <li><RouterLink to="/services" class="hover:text-white transition">All Services</RouterLink></li>
-              <li><RouterLink to="/projects" class="hover:text-white transition">11 Projects</RouterLink></li>
-              <li><RouterLink to="/estimator" class="hover:text-white transition">Cost Estimator</RouterLink></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 class="font-semibold text-white uppercase tracking-widest text-[#D4AF37]">Quick Links</h4>
-            <ul class="mt-4 space-y-2.5 text-zinc-400">
-              <li><RouterLink to="/pricing" class="hover:text-white transition">Pricing Tiers</RouterLink></li>
-              <li><RouterLink to="/contact" class="hover:text-white transition">Hire Us</RouterLink></li>
-              <li><a href="https://imran-akhtar.vercel.app/" target="_blank" rel="noopener" class="hover:text-white transition flex items-center gap-1"><span>ImranOS</span><ArrowUpRight :size="10" /></a></li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Newsletter -->
+        <!-- NAVIGATION -->
         <div>
-          <h4 class="text-xs font-semibold text-white uppercase tracking-widest text-[#D4AF37]">VALENCE Dispatch</h4>
-          <p class="mt-2 text-xs text-zinc-400 font-light">Direct insights from Imran Akhtar on full-stack web dev, Django APIs & Next.js.</p>
+          <h4 class="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#D4AF37]">
+            Navigation
+          </h4>
 
-          <form @submit.prevent="handleSubscribe" class="mt-4">
-            <div class="flex items-center rounded-xl border border-white/10 bg-[#0A0A0E] p-1.5 focus-within:border-[#D4AF37]">
-              <input
-                v-model="newsletterEmail"
-                type="email"
-                required
-                placeholder="your@email.com"
-                class="w-full bg-transparent px-3 py-1.5 text-xs text-white placeholder-zinc-600 focus:outline-none"
-              />
-              <button
-                type="submit"
-                class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#D4AF37] text-black font-bold shrink-0 hover:scale-105 transition"
-              >
-                <Check v-if="isSubscribed" :size="15" />
-                <Send v-else :size="13" />
-              </button>
-            </div>
-            <span v-if="isSubscribed" class="text-[10px] text-[#FCF6BA] mt-1 block">Subscribed successfully.</span>
-          </form>
+          <nav class="mt-6 flex flex-col gap-4 text-sm">
+            <RouterLink
+              to="/about"
+              class="w-fit text-zinc-500 transition hover:translate-x-1 hover:text-white"
+            >
+              About
+            </RouterLink>
+
+            <RouterLink
+              to="/services"
+              class="w-fit text-zinc-500 transition hover:translate-x-1 hover:text-white"
+            >
+              Services
+            </RouterLink>
+
+            <RouterLink
+              to="/projects"
+              class="w-fit text-zinc-500 transition hover:translate-x-1 hover:text-white"
+            >
+              Selected Work
+            </RouterLink>
+
+            <RouterLink
+              to="/contact"
+              class="w-fit text-zinc-500 transition hover:translate-x-1 hover:text-white"
+            >
+              Contact
+            </RouterLink>
+          </nav>
         </div>
 
-      </div>
+        <!-- CONNECT -->
+        <div>
+          <h4 class="text-[10px] font-semibold uppercase tracking-[0.25em] text-[#D4AF37]">
+            Let's Connect
+          </h4>
 
-      <!-- Bottom Bar -->
-      <div class="mt-16 flex flex-col sm:flex-row items-center justify-between border-t border-white/10 pt-8 text-[11px] text-zinc-500 font-mono">
-        <p>© 2026 VALENCE DIGITAL BY IMRAN AKHTAR. ALL RIGHTS RESERVED.</p>
-        
-        <div class="flex items-center gap-6 mt-4 sm:mt-0">
-          <RouterLink to="/about" class="hover:text-zinc-300">ABOUT FOUNDER</RouterLink>
-          <RouterLink to="/pricing" class="hover:text-zinc-300">PRICING</RouterLink>
-          <RouterLink to="/contact" class="hover:text-zinc-300">CONTACT</RouterLink>
+          <p class="mt-6 max-w-xs text-sm leading-6 text-zinc-500">
+            Have a project, idea, or challenge worth discussing? We'd love to hear about it.
+          </p>
+
+          <!-- Email -->
+          <a
+            href="mailto:hello@yourcompany.com"
+            class="group mt-6 flex w-fit items-center gap-3 text-sm text-zinc-300 transition hover:text-white"
+          >
+            <span
+              class="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.02]"
+            >
+              <Mail :size="14" class="text-zinc-500 transition group-hover:text-[#D4AF37]" />
+            </span>
+
+            <span> hello@yourcompany.com </span>
+          </a>
+
+          <!-- CTA -->
+          <RouterLink
+            to="/contact"
+            class="group mt-6 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#D4AF37]"
+          >
+            Start a conversation
+
+            <ArrowUpRight
+              :size="14"
+              class="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
+            />
+          </RouterLink>
         </div>
       </div>
 
+      <!-- ========================= -->
+      <!-- DIVIDER -->
+      <!-- ========================= -->
+
+      <div class="mt-16 border-t border-white/[0.08]"></div>
+
+      <!-- ========================= -->
+      <!-- BOTTOM BAR -->
+      <!-- ========================= -->
+
+      <div
+        class="flex flex-col gap-5 py-7 text-[10px] uppercase tracking-[0.12em] text-zinc-600 sm:flex-row sm:items-center sm:justify-between"
+      >
+        <!-- Copyright -->
+        <p>© 2026 Valence. All rights reserved.</p>
+
+        <!-- Center -->
+        <p class="hidden md:block">Built with purpose.</p>
+
+        <!-- Legal -->
+        <div class="flex items-center gap-6">
+          <RouterLink to="/privacy" class="transition hover:text-zinc-300"> Privacy </RouterLink>
+
+          <RouterLink to="/terms" class="transition hover:text-zinc-300"> Terms </RouterLink>
+        </div>
+      </div>
     </div>
   </footer>
 </template>
