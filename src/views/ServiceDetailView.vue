@@ -148,7 +148,7 @@ const service = computed(() => {
               >
                 <Cpu :size="13" class="text-[#D4AF37]" />
 
-                <span>VALENCE Service Specification</span>
+                <span>MOMENTUM LAB Service Specification</span>
               </Motion>
             </div>
 

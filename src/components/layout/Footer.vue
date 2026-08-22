@@ -21,22 +21,33 @@ import { Phone, MessageCircle } from 'lucide-vue-next'
       <div class="grid gap-14 lg:grid-cols-[1.4fr_0.8fr_1fr]">
         <!-- BRAND -->
         <div class="max-w-md">
-          <RouterLink to="/" class="group inline-flex items-center gap-3">
+          <RouterLink to="/" class="group inline-flex items-center gap-2.5">
             <!-- Logo -->
             <div
-              class="flex h-11 w-11 items-center justify-center rounded-xl border border-[#D4AF37]/40 bg-[#0B0B0F] transition duration-300 group-hover:border-[#D4AF37]/80"
+              class="flex h-12 w-auto shrink-0 items-center justify-center rounded-lg border border-[#D4AF37]/40 bg-[#0B0B0F] transition-colors duration-300 group-hover:border-[#D4AF37]/80"
             >
-              <span class="text-lg font-black text-[#D4AF37]"> V </span>
+              <img
+                src="/icon.webp"
+                alt="Momentum Lab"
+                width="40"
+                height="40"
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
+                class="h-11 w-auto rounded-lg object-contain"
+              />
             </div>
 
-            <!-- Name -->
-            <div>
-              <div class="text-xl font-extrabold tracking-[0.16em] text-white">
-                VALENCE<span class="text-[#D4AF37]">.IN</span>
+            <!-- Brand -->
+            <div class="min-w-0 leading-none">
+              <div class="text-[17px] font-extrabold tracking-[0.1em] text-white sm:text-[18px]">
+                MOMENTUM<span class="text-[#D4AF37]"> LAB</span>
               </div>
 
-              <div class="mt-0.5 text-[8px] uppercase tracking-[0.22em] text-zinc-600">
-                Digital Studio
+              <div
+                class="mt-1 text-[7px] font-medium uppercase tracking-[0.18em] text-zinc-500 sm:text-[8px]"
+              >
+                Building Digital Experiences
               </div>
             </div>
           </RouterLink>
@@ -125,7 +136,7 @@ import { Phone, MessageCircle } from 'lucide-vue-next'
           <div class="mt-6 flex flex-wrap gap-3">
             <!-- Email -->
             <a
-              href="mailto:imranakhtar1786@gmail.com"
+              href="mailto:info@momentumlab.in"
               class="group flex items-center gap-3 text-sm text-zinc-300 transition hover:text-white"
             >
               <span
@@ -134,7 +145,7 @@ import { Phone, MessageCircle } from 'lucide-vue-next'
                 <Mail :size="14" class="text-zinc-500 transition group-hover:text-[#D4AF37]" />
               </span>
 
-              <span>imranakhtar1786@gmail.com</span>
+              <span>info@momentumlab.in</span>
             </a>
 
             <!-- Phone -->
@@ -216,7 +227,7 @@ import { Phone, MessageCircle } from 'lucide-vue-next'
         class="flex flex-col gap-5 py-7 text-[10px] uppercase tracking-[0.12em] text-zinc-600 sm:flex-row sm:items-center sm:justify-between"
       >
         <!-- Copyright -->
-        <p>© 2026 Valence. All rights reserved.</p>
+        <p>© 2026 Momentum Lab. All rights reserved.</p>
 
         <!-- Center -->
         <p class="hidden md:block">Built with purpose.</p>

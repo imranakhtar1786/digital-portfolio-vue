@@ -257,7 +257,7 @@ onUnmounted(() => {
             <span
               class="font-mono text-[8px] uppercase tracking-[0.2em] text-[#D4AF37] sm:text-[9px]"
             >
-              Independent Digital Studio
+              Independent Digital Lab
             </span>
           </motion.div>
 

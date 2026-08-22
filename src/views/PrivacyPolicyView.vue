@@ -192,10 +192,10 @@ import CursorGlow from '@/components/common/CursorGlow.vue'
                 </p>
 
                 <a
-                  href="mailto:imranakhtar1786@gmail.com"
+                  href="mailto:info@momentumlab.in"
                   class="mt-5 inline-block text-sm font-semibold text-[#D4AF37] transition hover:text-[#FCF6BA]"
                 >
-                  imranakhtar1786@gmail.com
+                  info@momentumlab.in
                 </a>
               </div>
             </div>

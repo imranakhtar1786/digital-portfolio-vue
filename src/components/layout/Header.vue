@@ -82,25 +82,26 @@ onUnmounted(() => {
       "
     >
       <!-- Logo -->
-      <RouterLink to="/" class="group flex items-center gap-3" @click="closeMenu">
+      <RouterLink to="/" class="group flex shrink-0 items-center gap-2" @click="closeMenu">
         <div
-          class="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-[#D4AF37]/40 bg-gradient-to-br from-[#1E190E] to-[#0A0A0C] transition-all duration-500 group-hover:border-[#D4AF37] group-hover:shadow-[0_0_20px_rgba(212,175,55,0.4)]"
+          class="relative flex h-12 w-auto shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[#D4AF37]/40 bg-gradient-to-br from-[#1E190E] to-[#0A0A0C] transition-all duration-500 group-hover:border-[#D4AF37] group-hover:shadow-[0_0_15px_rgba(212,175,55,0.35)]"
         >
-          <span
-            class="text-[#FCF6BA] font-extrabold text-lg tracking-tighter transition-transform duration-300 group-hover:scale-110"
-          >
-            V
-          </span>
-          <div
-            class="absolute inset-0 bg-gradient-to-tr from-transparent via-[#D4AF37]/20 to-transparent"
-          ></div>
+          <img
+            src="/icon.webp"
+            alt="Momentum Lab"
+            width="40"
+            height="40"
+            decoding="async"
+            class="h-full w-full object-contain"
+          />
         </div>
 
-        <div class="flex flex-col">
-          <span class="text-base font-extrabold tracking-[0.18em] text-white">
-            VALENCE<span class="text-[#D4AF37]">.IN</span>
+        <div class="flex flex-col leading-none">
+          <span class="text-sm font-extrabold tracking-[0.1em] text-white">
+            MOMENTUM<span class="text-[#D4AF37]">LAB</span>
           </span>
-          <span class="text-[9px] uppercase tracking-[0.25em] text-[#C8A45D]/90 font-medium">
+
+          <span class="mt-1 text-[9px] font-medium uppercase tracking-[0.18em] text-[#C8A45D]/90">
             BY IMRAN AKHTAR
           </span>
         </div>
@@ -236,7 +237,7 @@ onUnmounted(() => {
             to="/about"
             class="rounded-xl px-4 py-3 text-zinc-300 transition hover:bg-[#121216] hover:text-[#D4AF37]"
             @click="closeMenu"
-            >About Imran</RouterLink
+            >About Us</RouterLink
           >
           <RouterLink
             to="/services"

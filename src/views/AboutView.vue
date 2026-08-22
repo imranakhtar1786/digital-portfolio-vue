@@ -224,7 +224,7 @@ const stats = [
             </span>
 
             <span class="font-mono text-[9px] uppercase tracking-[0.3em] text-[#D4AF37]">
-              About The Studio
+              About The Lab
             </span>
           </div>
 
@@ -240,9 +240,9 @@ const stats = [
           </h1>
 
           <p class="mt-8 max-w-2xl text-sm leading-[1.8] text-zinc-500 sm:text-base">
-            VALENCE is an independent digital development studio focused on building modern
-            websites, scalable applications and reliable digital infrastructure for businesses,
-            startups and individuals.
+            Momentum Lab is an independent digital lab focused on building modern websites, scalable
+            applications, and high-performance digital solutions for businesses, startups, and
+            ambitious individuals.
           </p>
         </Motion>
 
@@ -275,7 +275,7 @@ const stats = [
               :transition="{ duration: 0.5 }"
             >
               <span class="font-mono text-[9px] uppercase tracking-[0.3em] text-[#D4AF37]">
-                The Team Behind VALENCE
+                The Team Behind MOMENTUM LAB
               </span>
 
               <h2 class="mt-4 text-3xl font-black uppercase tracking-[-0.04em] sm:text-5xl">
@@ -284,7 +284,7 @@ const stats = [
               </h2>
 
               <p class="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-zinc-500">
-                VALENCE is managed by two full-stack developers working together across design,
+                MOMENTUM LAB is managed by two full-stack developers working together across design,
                 frontend development, backend systems, deployment and project delivery.
               </p>
             </Motion>
@@ -647,7 +647,7 @@ const stats = [
         </section>
 
         <!-- ================================================= -->
-        <!-- WHY VALENCE -->
+        <!-- WHY MOMENTUM LAB -->
         <!-- ================================================= -->
 
         <section class="mt-28">

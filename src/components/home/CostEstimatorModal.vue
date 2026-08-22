@@ -841,7 +841,7 @@ onBeforeUnmount(() => {
 
                 <div class="mt-5 flex items-center justify-between">
                   <span class="font-mono text-[7px] uppercase tracking-[0.2em] text-zinc-700">
-                    VALENCE DIGITAL
+                    MOMENTUM LAB
                   </span>
 
                   <span class="font-mono text-[7px] text-zinc-700">

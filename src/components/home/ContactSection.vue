@@ -33,7 +33,7 @@ const emit = defineEmits(['close'])
 
 const contactInfo = {
   name: 'Imran Akhtar',
-  email: 'imranakhtar1786@gmail.com',
+  email: 'info@momentumlab.in',
   phone: '+919155161786',
   company: 'Your Company Name',
 }
