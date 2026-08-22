@@ -1864,6 +1864,11 @@ vue-router@^5.2.0:
     unplugin-utils "^0.3.2"
     yaml "^2.9.0"
 
+vue-turnstile@^1.0.11:
+  version "1.0.11"
+  resolved "https://registry.yarnpkg.com/vue-turnstile/-/vue-turnstile-1.0.11.tgz#6b72cbeb25732b32f771d18a9a9ac7998c9bec07"
+  integrity sha512-iaTBoZ5oUqtNRto6bmbn6FQvW0h/sK7mPUJc1Qn4em+cELXN59U2FQTcpWfKssV3OY6lEZzmCpcn/zrb7htK3A==
+
 vue@^3.5.40:
   version "3.5.41"
   resolved "https://registry.yarnpkg.com/vue/-/vue-3.5.41.tgz#8864bddfe59ce128a28c9bad219cd9248916af73"
