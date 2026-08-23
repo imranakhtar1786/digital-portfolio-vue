@@ -36,6 +36,10 @@ const emit = defineEmits(['close'])
    CONFIG
 ========================================================= */
 
+// If using Google Apps Script directly:
+// const API_URL = import.meta.env.VITE_CONTACT_API_URL
+
+// If using your own backend/proxy:
 const API_URL = '/api/contact'
 
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY
@@ -54,7 +58,7 @@ const contactInfo = {
    FORM
 ========================================================= */
 
-const form = ref({
+const emptyForm = () => ({
   name: '',
   email: '',
   phone: '',
@@ -62,6 +66,8 @@ const form = ref({
   projectType: '',
   message: '',
 })
+
+const form = ref(emptyForm())
 
 const projectTypes = [
   'Website',
@@ -77,7 +83,7 @@ const projectTypes = [
    VALIDATION
 ========================================================= */
 
-const errors = ref({
+const emptyErrors = () => ({
   name: '',
   email: '',
   phone: '',
@@ -85,6 +91,8 @@ const errors = ref({
   projectType: '',
   message: '',
 })
+
+const errors = ref(emptyErrors())
 
 const errorMessage = ref('')
 
@@ -111,7 +119,7 @@ let turnstileWidgetId = null
 let modalTurnstileWidgetId = null
 
 /* =========================================================
-   LOAD TURNSTILE
+   LOAD TURNSTILE SCRIPT
 ========================================================= */
 
 const loadTurnstileScript = () => {
@@ -132,6 +140,7 @@ const loadTurnstileScript = () => {
           clearInterval(checkReady)
 
           turnstileReady.value = true
+
           resolve()
         }
       }, 100)
@@ -185,6 +194,7 @@ const renderTurnstile = async (container, type = 'main') => {
   }
 
   try {
+    // Remove existing widget from the same container
     container.innerHTML = ''
 
     const widgetId = window.turnstile.render(container, {
@@ -276,23 +286,95 @@ const resetTurnstile = (type = 'main') => {
 ========================================================= */
 
 const clearErrors = () => {
-  errors.value = {
-    name: '',
-    email: '',
-    phone: '',
-    company: '',
-    projectType: '',
-    message: '',
-  }
-
+  errors.value = emptyErrors()
   errorMessage.value = ''
 }
 
+/* =========================================================
+   EMAIL VALIDATION
+========================================================= */
+
 const validateEmail = (email) => {
+  const value = email.trim()
+
   const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
-  return pattern.test(email)
+  return pattern.test(value)
 }
+
+/* =========================================================
+   PHONE VALIDATION
+========================================================= */
+
+const validatePhone = (phone) => {
+  if (!phone) return false
+
+  const value = phone.trim()
+
+  /*
+   * Allowed:
+   *
+   * +91 98765 43210
+   * +919876543210
+   * 98765 43210
+   * +1 (202) 555-0123
+   * +44 20 7946 0958
+   * 9876543210
+   */
+
+  // Only allow:
+  // digits
+  // spaces
+  // +
+  // -
+  // .
+  // (
+  // )
+  const allowedCharacters = /^[+\d\s().-]+$/
+
+  if (!allowedCharacters.test(value)) {
+    return false
+  }
+
+  // "+" can only appear at the beginning
+  if (value.includes('+') && !value.startsWith('+')) {
+    return false
+  }
+
+  // Only one "+" is allowed
+  if ((value.match(/\+/g) || []).length > 1) {
+    return false
+  }
+
+  // Remove formatting characters
+  const digits = value.replace(/\D/g, '')
+
+  /*
+   * International phone numbers can have
+   * up to 15 digits according to E.164.
+   *
+   * We allow 7-15 digits for practical
+   * international numbers.
+   */
+  if (digits.length < 7 || digits.length > 15) {
+    return false
+  }
+
+  // Reject numbers consisting of the same digit
+  // Example:
+  // 0000000000
+  // 1111111111
+  // 9999999999
+  if (/^(\d)\1+$/.test(digits)) {
+    return false
+  }
+
+  return true
+}
+
+/* =========================================================
+   FORM VALIDATION
+========================================================= */
 
 const validateForm = () => {
   clearErrors()
@@ -301,37 +383,64 @@ const validateForm = () => {
 
   const name = form.value.name.trim()
   const email = form.value.email.trim()
+  const phone = form.value.phone.trim()
   const company = form.value.company.trim()
   const projectType = form.value.projectType
   const message = form.value.message.trim()
 
-  /* NAME */
+  /* =======================================================
+     NAME
+  ======================================================= */
 
   if (!name) {
     errors.value.name = 'Please enter your name.'
+
     valid = false
   } else if (name.length < 2) {
     errors.value.name = 'Name must contain at least 2 characters.'
+
     valid = false
   } else if (name.length > 80) {
     errors.value.name = 'Name must be less than 80 characters.'
+
     valid = false
   }
 
-  /* EMAIL */
+  /* =======================================================
+     EMAIL
+  ======================================================= */
 
   if (!email) {
     errors.value.email = 'Please enter your email.'
+
     valid = false
   } else if (!validateEmail(email)) {
     errors.value.email = 'Please enter a valid email address.'
+
     valid = false
   } else if (email.length > 150) {
     errors.value.email = 'Email is too long.'
+
     valid = false
   }
 
-  /* COMPANY */
+  /* =======================================================
+     PHONE
+  ======================================================= */
+
+  if (!phone) {
+    errors.value.phone = 'Please enter your phone number.'
+
+    valid = false
+  } else if (!validatePhone(phone)) {
+    errors.value.phone = 'Please enter a valid phone number.'
+
+    valid = false
+  }
+
+  /* =======================================================
+     COMPANY
+  ======================================================= */
 
   if (company.length > 120) {
     errors.value.company = 'Company name must be less than 120 characters.'
@@ -339,7 +448,9 @@ const validateForm = () => {
     valid = false
   }
 
-  /* PROJECT TYPE */
+  /* =======================================================
+     PROJECT TYPE
+  ======================================================= */
 
   if (!projectType) {
     errors.value.projectType = 'Please select a project type.'
@@ -347,7 +458,9 @@ const validateForm = () => {
     valid = false
   }
 
-  /* MESSAGE */
+  /* =======================================================
+     MESSAGE
+  ======================================================= */
 
   if (message.length > 3000) {
     errors.value.message = 'Project description must be less than 3000 characters.'
@@ -369,7 +482,9 @@ const clearFieldError = (field) => {
 
 const selectProjectType = (type) => {
   form.value.projectType = type
+
   errors.value.projectType = ''
+
   errorMessage.value = ''
 }
 
@@ -447,7 +562,9 @@ const submitForm = async () => {
 
   errorMessage.value = ''
 
-  /* VALIDATE */
+  /* =======================================================
+     VALIDATE
+  ======================================================= */
 
   const isValid = validateForm()
 
@@ -457,7 +574,9 @@ const submitForm = async () => {
     return
   }
 
-  /* CAPTCHA */
+  /* =======================================================
+     CAPTCHA
+  ======================================================= */
 
   const captchaToken = props.isOpen ? modalTurnstileToken.value : mainTurnstileToken.value
 
@@ -513,7 +632,9 @@ const submitForm = async () => {
       throw new Error(result.message || `Request failed with status ${response.status}`)
     }
 
-    /* SUCCESS */
+    /* =====================================================
+       SUCCESS
+    ===================================================== */
 
     formSubmitted.value = true
 
@@ -548,14 +669,7 @@ const resetForm = async () => {
 
   clearErrors()
 
-  form.value = {
-    name: '',
-    email: '',
-    phone: '',
-    company: '',
-    projectType: '',
-    message: '',
-  }
+  form.value = emptyForm()
 
   mainTurnstileToken.value = ''
   modalTurnstileToken.value = ''
@@ -987,13 +1101,14 @@ onBeforeUnmount(() => {
 
               <h3 class="mt-3 text-3xl font-black uppercase tracking-[-0.05em] sm:text-4xl">
                 We'll be in touch
-                <span class="text-[#D4AF37]">.</span>
+                <span class="text-[#D4AF37]"> . </span>
               </h3>
 
               <p class="mt-4 max-w-md text-xs leading-relaxed text-zinc-500 sm:text-sm">
                 Thanks,
-                <span class="text-zinc-300"> {{ form.name }} </span>. Your project details have been
-                received.
+                <span class="text-zinc-300">
+                  {{ form.name }} </span
+                >. Your project details have been received.
               </p>
 
               <button
@@ -1056,6 +1171,7 @@ onBeforeUnmount(() => {
                     class="mt-1.5 flex items-center gap-1 text-[9px] text-red-400"
                   >
                     <AlertCircle :size="11" />
+
                     {{ errors.name }}
                   </p>
                 </div>
@@ -1090,6 +1206,7 @@ onBeforeUnmount(() => {
                     class="mt-1.5 flex items-center gap-1 text-[9px] text-red-400"
                   >
                     <AlertCircle :size="11" />
+
                     {{ errors.email }}
                   </p>
                 </div>
@@ -1098,6 +1215,8 @@ onBeforeUnmount(() => {
               <!-- COMPANY & PHONE -->
 
               <div class="grid gap-4 sm:grid-cols-2">
+                <!-- COMPANY -->
+
                 <div>
                   <label
                     class="mb-1.5 block font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-600"
@@ -1125,15 +1244,18 @@ onBeforeUnmount(() => {
                     class="mt-1.5 flex items-center gap-1 text-[9px] text-red-400"
                   >
                     <AlertCircle :size="11" />
+
                     {{ errors.company }}
                   </p>
                 </div>
+
+                <!-- PHONE -->
 
                 <div>
                   <label
                     class="mb-1.5 block font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-600"
                   >
-                    Phone Number
+                    Phone Number *
                   </label>
 
                   <input
@@ -1141,6 +1263,7 @@ onBeforeUnmount(() => {
                     type="tel"
                     maxlength="30"
                     autocomplete="tel"
+                    inputmode="tel"
                     placeholder="+91 98765 43210"
                     :class="[
                       'w-full rounded-xl border bg-[#0B0B0E] px-4 py-3 text-xs text-white outline-none transition placeholder:text-zinc-700',
@@ -1156,6 +1279,7 @@ onBeforeUnmount(() => {
                     class="mt-1.5 flex items-center gap-1 text-[9px] text-red-400"
                   >
                     <AlertCircle :size="11" />
+
                     {{ errors.phone }}
                   </p>
                 </div>
@@ -1192,6 +1316,7 @@ onBeforeUnmount(() => {
                   class="mt-2 flex items-center gap-1 text-[9px] text-red-400"
                 >
                   <AlertCircle :size="11" />
+
                   {{ errors.projectType }}
                 </p>
               </div>
@@ -1226,6 +1351,7 @@ onBeforeUnmount(() => {
                 <div class="mt-1 flex justify-between">
                   <p v-if="errors.message" class="flex items-center gap-1 text-[9px] text-red-400">
                     <AlertCircle :size="11" />
+
                     {{ errors.message }}
                   </p>
 
@@ -1405,7 +1531,9 @@ onBeforeUnmount(() => {
 
             <p class="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-zinc-500">
               Thanks,
-              <span class="text-zinc-300"> {{ form.name }} </span>. We'll get back to you soon.
+              <span class="text-zinc-300">
+                {{ form.name }} </span
+              >. We'll get back to you soon.
             </p>
 
             <button
@@ -1483,6 +1611,8 @@ onBeforeUnmount(() => {
             <!-- COMPANY & PHONE -->
 
             <div class="grid gap-4 sm:grid-cols-2">
+              <!-- COMPANY -->
+
               <div>
                 <label
                   class="mb-2 block font-mono text-[9px] uppercase tracking-widest text-zinc-600"
@@ -1510,11 +1640,13 @@ onBeforeUnmount(() => {
                 </p>
               </div>
 
+              <!-- PHONE -->
+
               <div>
                 <label
                   class="mb-2 block font-mono text-[9px] uppercase tracking-widest text-zinc-600"
                 >
-                  Phone Number
+                  Phone Number *
                 </label>
 
                 <input
@@ -1522,6 +1654,7 @@ onBeforeUnmount(() => {
                   maxlength="30"
                   type="tel"
                   autocomplete="tel"
+                  inputmode="tel"
                   placeholder="+91 98765 43210"
                   :class="[
                     'w-full rounded-xl border bg-[#0B0B0E] px-4 py-3.5 text-sm text-white outline-none placeholder:text-zinc-700',

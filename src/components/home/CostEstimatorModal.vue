@@ -13,7 +13,6 @@ import {
   Smartphone,
   Server,
   ShoppingCart,
-  Code2,
   CheckCircle2,
   AlertCircle,
   Loader2,
@@ -51,6 +50,7 @@ const errorMessage = ref('')
 const fieldErrors = ref({
   name: '',
   email: '',
+  phone: '',
 })
 
 const selectedType = ref('landing')
@@ -201,7 +201,7 @@ const calculatedInr = computed(() => {
 })
 
 /* -------------------------------------------------------
-   TURNSTILE STATE
+   TURNSTILE
 ------------------------------------------------------- */
 
 const turnstileToken = ref('')
@@ -268,7 +268,7 @@ const loadTurnstileScript = () => {
 }
 
 /* -------------------------------------------------------
-   RENDER / RESET TURNSTILE
+   RENDER TURNSTILE
 ------------------------------------------------------- */
 
 const renderTurnstile = async (container) => {
@@ -287,9 +287,7 @@ const renderTurnstile = async (container) => {
 
     turnstileWidgetId = window.turnstile.render(container, {
       sitekey: TURNSTILE_SITE_KEY,
-
       theme: 'dark',
-
       size: 'flexible',
 
       callback: (token) => {
@@ -319,6 +317,10 @@ const renderTurnstile = async (container) => {
   }
 }
 
+/* -------------------------------------------------------
+   RESET TURNSTILE
+------------------------------------------------------- */
+
 const resetTurnstile = () => {
   try {
     if (!window.turnstile) return
@@ -332,6 +334,10 @@ const resetTurnstile = () => {
     console.error('Turnstile reset error:', error)
   }
 }
+
+/* -------------------------------------------------------
+   INITIALIZE TURNSTILE
+------------------------------------------------------- */
 
 const initializeTurnstile = async () => {
   try {
@@ -384,18 +390,42 @@ const validateEmail = (email) => {
   return pattern.test(email)
 }
 
+/*
+ * Phone validation:
+ * - Allows +, spaces, -, brackets
+ * - Checks actual digits
+ * - Requires 10–15 digits
+ *
+ * Examples:
+ * +91 98765 43210
+ * 9876543210
+ * +1 202 555 0198
+ */
+const validatePhone = (phone) => {
+  const digits = phone.replace(/\D/g, '')
+
+  return digits.length >= 10 && digits.length <= 15
+}
+
 const clearFieldError = (field) => {
   fieldErrors.value[field] = ''
   errorMessage.value = ''
 }
 
 const validateStepThree = () => {
-  fieldErrors.value = { name: '', email: '' }
+  fieldErrors.value = {
+    name: '',
+    email: '',
+    phone: '',
+  }
 
   let valid = true
 
   const name = clientName.value.trim()
   const email = clientEmail.value.trim()
+  const phone = clientPhone.value.trim()
+
+  /* NAME */
 
   if (!name) {
     fieldErrors.value.name = 'Please enter your name.'
@@ -405,11 +435,23 @@ const validateStepThree = () => {
     valid = false
   }
 
+  /* EMAIL */
+
   if (!email) {
     fieldErrors.value.email = 'Please enter your email.'
     valid = false
   } else if (!validateEmail(email)) {
     fieldErrors.value.email = 'Please enter a valid email address.'
+    valid = false
+  }
+
+  /* PHONE */
+
+  if (!phone) {
+    fieldErrors.value.phone = 'Please enter your phone number.'
+    valid = false
+  } else if (!validatePhone(phone)) {
+    fieldErrors.value.phone = 'Please enter a valid phone number with 10–15 digits.'
     valid = false
   }
 
@@ -467,27 +509,44 @@ const handleSubmit = async () => {
 
   try {
     const payload = {
+      /* REQUIRED CONTACT DETAILS */
+
       name: clientName.value.trim(),
       email: clientEmail.value.trim(),
       phone: clientPhone.value.trim(),
+
+      /* OPTIONAL */
+
       company: clientOrg.value.trim(),
       message: clientNotes.value.trim(),
+
+      /* PROJECT */
 
       projectType: selectedProject.value.id,
       projectLabel: selectedProject.value.label,
 
+      /* TIMELINE */
+
       timeline: selectedDelivery.value.id,
       timelineLabel: selectedDelivery.value.label,
 
+      /* ADDONS */
+
       addons: selectedAddonDetails.value.map((addon) => addon.id),
+
       addonLabels: selectedAddonDetails.value.map((addon) => addon.label),
+
+      /* ESTIMATE */
 
       estimateUsd: calculatedUsd.value,
       estimatedUsd: calculatedUsd.value,
+
       estimateInr: calculatedInr.value,
       estimatedInr: calculatedInr.value,
 
       isEstimator: true,
+
+      /* TURNSTILE */
 
       turnstileToken: turnstileToken.value,
     }
@@ -530,13 +589,21 @@ const handleSubmit = async () => {
   }
 }
 
+/* -------------------------------------------------------
+   RESET ESTIMATOR
+------------------------------------------------------- */
+
 const resetEstimator = () => {
   currentStep.value = 1
   isSubmitted.value = false
   isSubmitting.value = false
   errorMessage.value = ''
 
-  fieldErrors.value = { name: '', email: '' }
+  fieldErrors.value = {
+    name: '',
+    email: '',
+    phone: '',
+  }
 
   selectedType.value = 'landing'
   selectedTimeline.value = 'standard'
@@ -551,9 +618,14 @@ const resetEstimator = () => {
   turnstileToken.value = ''
 }
 
+/* -------------------------------------------------------
+   CLOSE MODAL
+------------------------------------------------------- */
+
 const closeModal = () => {
   resetTurnstile()
   resetEstimator()
+
   emit('close')
 }
 
@@ -573,8 +645,6 @@ watch(
     document.body.style.overflow = open ? 'hidden' : ''
 
     if (open) {
-      // Container is now permanently mounted (see template), so a single
-      // init after the DOM settles is enough — no per-step race anymore.
       await nextTick()
 
       if (turnstileReady.value && turnstileContainer.value) {
@@ -586,7 +656,9 @@ watch(
       resetTurnstile()
     }
   },
-  { immediate: true },
+  {
+    immediate: true,
+  },
 )
 
 watch(
@@ -602,8 +674,13 @@ watch(
   },
 )
 
+/* -------------------------------------------------------
+   MOUNT / UNMOUNT
+------------------------------------------------------- */
+
 onMounted(async () => {
   window.addEventListener('keydown', handleEscape)
+
   if (props.isOpen) {
     await initializeTurnstile()
   }
@@ -611,6 +688,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   document.body.style.overflow = ''
+
   window.removeEventListener('keydown', handleEscape)
 
   try {
@@ -637,6 +715,7 @@ onBeforeUnmount(() => {
       class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-3 backdrop-blur-xl sm:p-5"
     >
       <!-- BACKDROP -->
+
       <button
         type="button"
         aria-label="Close estimator"
@@ -645,10 +724,12 @@ onBeforeUnmount(() => {
       ></button>
 
       <!-- MODAL -->
+
       <div
         class="relative z-10 flex h-[min(760px,calc(100vh-24px))] w-full max-w-5xl flex-col overflow-hidden rounded-[24px] border border-white/[0.09] bg-[#07070A] text-white shadow-[0_30px_120px_rgba(0,0,0,0.7)] sm:h-[min(720px,calc(100vh-40px))]"
       >
         <!-- GOLD GLOW -->
+
         <div
           class="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-[#D4AF37]/[0.07] blur-[100px]"
         ></div>
@@ -657,9 +738,7 @@ onBeforeUnmount(() => {
           class="pointer-events-none absolute -bottom-40 left-1/3 h-80 w-80 rounded-full bg-[#D4AF37]/[0.025] blur-[100px]"
         ></div>
 
-        <!-- =================================================
-             HEADER
-        ================================================== -->
+        <!-- HEADER -->
 
         <header
           class="relative flex shrink-0 items-center justify-between border-b border-white/[0.07] bg-[#0A0A0E] px-4 py-3.5 sm:px-6 sm:py-4"
@@ -702,9 +781,7 @@ onBeforeUnmount(() => {
           </button>
         </header>
 
-        <!-- =================================================
-             SUCCESS
-        ================================================== -->
+        <!-- SUCCESS -->
 
         <div
           v-if="isSubmitted"
@@ -727,8 +804,9 @@ onBeforeUnmount(() => {
 
             <p class="mt-4 text-sm leading-relaxed text-zinc-500">
               Thanks
-              <span class="font-medium text-zinc-200"> {{ clientName || 'there' }} </span>. We'll
-              review your requirements and contact you at
+              <span class="font-medium text-zinc-200">
+                {{ clientName || 'there' }} </span
+              >. We'll review your requirements and contact you at
               <span class="text-zinc-300">
                 {{ clientEmail }}
               </span>
@@ -755,14 +833,10 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <!-- =================================================
-             MAIN ESTIMATOR
-        ================================================== -->
+        <!-- MAIN ESTIMATOR -->
 
         <div v-else class="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_280px]">
-          <!-- =================================================
-               LEFT CONTENT
-          ================================================== -->
+          <!-- LEFT -->
 
           <div
             data-estimator-scroll
@@ -790,9 +864,7 @@ onBeforeUnmount(() => {
                 </div>
               </div>
 
-              <!-- =================================================
-                   STEP 1
-              ================================================== -->
+              <!-- STEPS -->
 
               <Transition
                 mode="out-in"
@@ -803,6 +875,8 @@ onBeforeUnmount(() => {
                 leave-from-class="opacity-100 translate-x-0"
                 leave-to-class="opacity-0 -translate-x-3"
               >
+                <!-- STEP 1 -->
+
                 <div v-if="currentStep === 1" key="step-one" class="space-y-4">
                   <div>
                     <h3 class="text-lg font-black uppercase tracking-[-0.03em]">
@@ -857,7 +931,7 @@ onBeforeUnmount(() => {
 
                       <span
                         v-if="selectedType === project.id"
-                        class="absolute right-3 bottom-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#D4AF37] text-black"
+                        class="absolute bottom-3 right-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#D4AF37] text-black"
                       >
                         <Check :size="12" />
                       </span>
@@ -865,9 +939,7 @@ onBeforeUnmount(() => {
                   </div>
                 </div>
 
-                <!-- =================================================
-                     STEP 2
-                ================================================== -->
+                <!-- STEP 2 -->
 
                 <div v-else-if="currentStep === 2" key="step-two" class="space-y-6">
                   <div>
@@ -880,7 +952,7 @@ onBeforeUnmount(() => {
                     </p>
                   </div>
 
-                  <!-- Delivery -->
+                  <!-- DELIVERY -->
 
                   <div>
                     <div class="mb-3 flex items-center justify-between">
@@ -935,7 +1007,7 @@ onBeforeUnmount(() => {
                     </div>
                   </div>
 
-                  <!-- Addons -->
+                  <!-- ADDONS -->
 
                   <div>
                     <div class="mb-3 flex items-center justify-between">
@@ -944,7 +1016,8 @@ onBeforeUnmount(() => {
                       </span>
 
                       <span class="font-mono text-[8px] text-zinc-700">
-                        {{ selectedAddons.length }} selected
+                        {{ selectedAddons.length }}
+                        selected
                       </span>
                     </div>
 
@@ -991,9 +1064,7 @@ onBeforeUnmount(() => {
                   </div>
                 </div>
 
-                <!-- =================================================
-                     STEP 3
-                ================================================== -->
+                <!-- STEP 3 -->
 
                 <div v-else key="step-three" class="space-y-5">
                   <div>
@@ -1006,7 +1077,11 @@ onBeforeUnmount(() => {
                     </p>
                   </div>
 
+                  <!-- NAME + EMAIL -->
+
                   <div class="grid gap-4 sm:grid-cols-2">
+                    <!-- NAME -->
+
                     <div>
                       <label
                         class="mb-2 block font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-600"
@@ -1035,9 +1110,12 @@ onBeforeUnmount(() => {
                         class="mt-1.5 flex items-center gap-1 text-[9px] text-red-400"
                       >
                         <AlertCircle :size="11" />
+
                         {{ fieldErrors.name }}
                       </p>
                     </div>
+
+                    <!-- EMAIL -->
 
                     <div>
                       <label
@@ -1067,12 +1145,17 @@ onBeforeUnmount(() => {
                         class="mt-1.5 flex items-center gap-1 text-[9px] text-red-400"
                       >
                         <AlertCircle :size="11" />
+
                         {{ fieldErrors.email }}
                       </p>
                     </div>
                   </div>
 
+                  <!-- COMPANY + PHONE -->
+
                   <div class="grid gap-4 sm:grid-cols-2">
+                    <!-- COMPANY OPTIONAL -->
+
                     <div>
                       <label
                         class="mb-2 block font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-600"
@@ -1090,23 +1173,43 @@ onBeforeUnmount(() => {
                       />
                     </div>
 
+                    <!-- PHONE REQUIRED -->
+
                     <div>
                       <label
                         class="mb-2 block font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-600"
                       >
-                        Phone Number
+                        Phone Number *
                       </label>
 
                       <input
                         v-model="clientPhone"
+                        required
                         type="tel"
-                        maxlength="30"
+                        maxlength="20"
                         autocomplete="tel"
                         placeholder="+91 98765 43210"
-                        class="w-full rounded-xl border border-white/[0.08] bg-[#0A0A0E] px-4 py-3 text-xs text-white outline-none transition focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/10"
+                        :class="[
+                          'w-full rounded-xl border bg-[#0A0A0E] px-4 py-3 text-xs text-white outline-none transition focus:ring-1',
+                          fieldErrors.phone
+                            ? 'border-red-500/50 focus:ring-red-500/10'
+                            : 'border-white/[0.08] focus:border-[#D4AF37]/50 focus:ring-[#D4AF37]/10',
+                        ]"
+                        @input="clearFieldError('phone')"
                       />
+
+                      <p
+                        v-if="fieldErrors.phone"
+                        class="mt-1.5 flex items-center gap-1 text-[9px] text-red-400"
+                      >
+                        <AlertCircle :size="11" />
+
+                        {{ fieldErrors.phone }}
+                      </p>
                     </div>
                   </div>
+
+                  <!-- NOTES -->
 
                   <div>
                     <label
@@ -1126,12 +1229,7 @@ onBeforeUnmount(() => {
                 </div>
               </Transition>
 
-              <!-- =================================================
-                   TURNSTILE — permanently mounted (not inside the
-                   stepped Transition above) so the widget survives
-                   step navigation instead of being destroyed and
-                   recreated. Only visible on step 3.
-              ================================================== -->
+              <!-- TURNSTILE -->
 
               <div v-show="currentStep === 3" class="mt-5 space-y-4">
                 <div class="flex w-full items-start justify-start overflow-visible pt-1 text-left">
@@ -1161,9 +1259,7 @@ onBeforeUnmount(() => {
                 </Transition>
               </div>
 
-              <!-- =================================================
-                   NAVIGATION
-              ================================================== -->
+              <!-- NAVIGATION -->
 
               <div class="mt-6 flex items-center justify-between border-t border-white/[0.06] pt-5">
                 <button
@@ -1180,6 +1276,8 @@ onBeforeUnmount(() => {
 
                 <div v-else></div>
 
+                <!-- CONTINUE -->
+
                 <button
                   v-if="currentStep < 3"
                   type="button"
@@ -1191,10 +1289,14 @@ onBeforeUnmount(() => {
                   <ArrowRight :size="13" class="transition group-hover:translate-x-1" />
                 </button>
 
+                <!-- SUBMIT -->
+
                 <button
                   v-else
                   type="button"
-                  :disabled="isSubmitting || !clientName || !clientEmail || !turnstileToken"
+                  :disabled="
+                    isSubmitting || !clientName || !clientEmail || !clientPhone || !turnstileToken
+                  "
                   class="group flex min-w-[190px] items-center justify-center gap-2 rounded-xl bg-[#D4AF37] px-6 py-3 text-[9px] font-black uppercase tracking-widest text-black transition-all hover:bg-[#E4C55A] disabled:cursor-not-allowed disabled:opacity-40"
                   @click="handleSubmit"
                 >
@@ -1210,9 +1312,7 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <!-- =================================================
-               RIGHT SUMMARY
-          ================================================== -->
+          <!-- RIGHT SUMMARY -->
 
           <aside
             class="relative hidden min-h-0 border-l border-white/[0.07] bg-[#050507] lg:flex lg:flex-col"
@@ -1227,7 +1327,7 @@ onBeforeUnmount(() => {
                   <Sparkles :size="14" class="text-[#D4AF37]" />
                 </div>
 
-                <!-- Total -->
+                <!-- TOTAL -->
 
                 <div class="mt-8">
                   <p class="font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-600">
@@ -1243,11 +1343,11 @@ onBeforeUnmount(() => {
                   </p>
                 </div>
 
-                <!-- Summary -->
+                <!-- SUMMARY -->
 
                 <div class="mt-8 space-y-3 border-t border-white/[0.06] pt-5">
                   <div class="flex items-center justify-between text-[10px]">
-                    <span class="text-zinc-600">Service</span>
+                    <span class="text-zinc-600"> Service </span>
 
                     <span class="max-w-[140px] truncate text-right text-zinc-300">
                       {{ selectedProject.short }}
@@ -1255,7 +1355,7 @@ onBeforeUnmount(() => {
                   </div>
 
                   <div class="flex items-center justify-between text-[10px]">
-                    <span class="text-zinc-600">Delivery</span>
+                    <span class="text-zinc-600"> Delivery </span>
 
                     <span class="text-zinc-300">
                       {{ selectedDelivery.label }}
@@ -1263,7 +1363,7 @@ onBeforeUnmount(() => {
                   </div>
 
                   <div class="flex items-center justify-between text-[10px]">
-                    <span class="text-zinc-600">Add-ons</span>
+                    <span class="text-zinc-600"> Add-ons </span>
 
                     <span class="text-zinc-300">
                       {{ selectedAddons.length }}
@@ -1272,7 +1372,7 @@ onBeforeUnmount(() => {
                 </div>
               </div>
 
-              <!-- Bottom -->
+              <!-- BOTTOM -->
 
               <div>
                 <div class="rounded-2xl border border-[#D4AF37]/10 bg-[#D4AF37]/[0.025] p-4">
@@ -1297,7 +1397,8 @@ onBeforeUnmount(() => {
                   </span>
 
                   <span class="font-mono text-[7px] text-zinc-700">
-                    {{ String(currentStep).padStart(2, '0') }} / 03
+                    {{ String(currentStep).padStart(2, '0') }}
+                    / 03
                   </span>
                 </div>
               </div>
