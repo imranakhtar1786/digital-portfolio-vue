@@ -72,6 +72,9 @@ export default async function handler(req, res) {
 
     const sheetsResponse = await fetch(process.env.GOOGLE_SHEETS_API, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(contactData),
     })
 
