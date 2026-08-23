@@ -469,7 +469,7 @@ const handleSubmit = async () => {
       name: clientName.value.trim(),
       email: clientEmail.value.trim(),
       company: clientOrg.value.trim(),
-      notes: clientNotes.value.trim(),
+      message: clientNotes.value.trim(),
 
       projectType: selectedProject.value.id,
       projectLabel: selectedProject.value.label,
