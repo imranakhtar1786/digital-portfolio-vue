@@ -95,33 +95,54 @@ body {
   background: rgba(212, 175, 55, 0.6);
 }
 
-/* Keyframe animations */
+/* Keyframe animations - GPU accelerated */
 @keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px) rotate(0deg);
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
   }
   50% {
-    transform: translateY(-12px) rotate(1deg);
+    transform: translate3d(0, -12px, 0) rotate(1deg);
   }
 }
 
 @keyframes pulseGlow {
-  0%,
-  100% {
-    opacity: 0.3;
-    transform: scale(1);
+  0%, 100% {
+    opacity: 0.35;
+    transform: translate3d(-50%, -50%, 0) scale(1);
   }
   50% {
-    opacity: 0.6;
-    transform: scale(1.05);
+    opacity: 0.75;
+    transform: translate3d(-50%, -50%, 0) scale(1.08);
+  }
+}
+
+@keyframes pulseGlowSecondary {
+  0%, 100% {
+    opacity: 0.25;
+    transform: translate3d(-50%, -50%, 0) scale(1.1) rotate(0deg);
+  }
+  50% {
+    opacity: 0.55;
+    transform: translate3d(-50%, -50%, 0) scale(0.92) rotate(180deg);
   }
 }
 
 .animate-float {
   animation: float 8s ease-in-out infinite;
+  will-change: transform;
 }
 
 .animate-pulse-glow {
-  animation: pulseGlow 6s ease-in-out infinite;
+  animation: pulseGlow 7s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.animate-pulse-glow-sec {
+  animation: pulseGlowSecondary 9s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }

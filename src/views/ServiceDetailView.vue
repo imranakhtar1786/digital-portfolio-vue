@@ -18,7 +18,6 @@ import { formatCurrency } from '@/stores/currencyStore.js'
 
 import Header from '@/components/layout/Header.vue'
 import Footer from '@/components/layout/Footer.vue'
-import CursorGlow from '@/components/common/CursorGlow.vue'
 
 const route = useRoute()
 
@@ -29,8 +28,6 @@ const service = computed(() => {
 
 <template>
   <div class="relative min-h-screen overflow-hidden bg-[#030303] text-white">
-    <CursorGlow />
-
     <Header />
 
     <main v-if="service" class="relative overflow-hidden pt-28 pb-24 sm:pt-32">

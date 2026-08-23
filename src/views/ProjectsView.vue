@@ -16,7 +16,6 @@ import { Motion } from 'motion-v'
 import { projects } from '@/data/projects.js'
 import Header from '@/components/layout/Header.vue'
 import Footer from '@/components/layout/Footer.vue'
-import CursorGlow from '@/components/common/CursorGlow.vue'
 
 const searchQuery = ref('')
 const selectedCategory = ref('All')
@@ -59,8 +58,6 @@ const resetFilters = () => {
 
 <template>
   <div class="relative min-h-screen overflow-hidden bg-[#030303] text-white">
-    <CursorGlow />
-
     <Header />
 
     <main class="relative pb-24 pt-28 sm:pt-32">

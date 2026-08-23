@@ -7,7 +7,6 @@ import { Motion } from 'motion-v'
 import { projects } from '@/data/projects.js'
 import Header from '@/components/layout/Header.vue'
 import Footer from '@/components/layout/Footer.vue'
-import CursorGlow from '@/components/common/CursorGlow.vue'
 
 const route = useRoute()
 
@@ -18,8 +17,6 @@ const project = computed(() => {
 
 <template>
   <div class="relative min-h-screen overflow-hidden bg-[#030303] text-white">
-    <CursorGlow />
-
     <Header />
 
     <main v-if="project" class="relative pb-24 pt-28 sm:pt-32">

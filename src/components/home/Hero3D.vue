@@ -8,113 +8,89 @@ import { ArrowUpRight, Sparkles, Code2, Database, Activity, Play } from 'lucide-
 const emit = defineEmits(['open-estimator'])
 
 /* =========================================================
-   HERO MOUSE PARALLAX
+   HERO MOUSE PARALLAX (High Performance)
 ========================================================= */
 
 const heroRef = ref(null)
-
-const mouse = ref({
-  x: 0,
-  y: 0,
-})
-
-const smooth = ref({
-  x: 0,
-  y: 0,
-})
+const mouse = ref({ x: 0, y: 0 })
+const smooth = ref({ x: 0, y: 0 })
 
 let frame = null
+let isFinePointer = false
 
 const handleMouseMove = (event) => {
   if (!heroRef.value) return
-
   const rect = heroRef.value.getBoundingClientRect()
-
   mouse.value = {
     x: ((event.clientX - rect.left) / rect.width - 0.5) * 2,
     y: ((event.clientY - rect.top) / rect.height - 0.5) * 2,
   }
-}
-
-const resetMouse = () => {
-  mouse.value = {
-    x: 0,
-    y: 0,
+  if (!frame) {
+    frame = requestAnimationFrame(animate)
   }
 }
 
-const animate = () => {
-  smooth.value.x += (mouse.value.x - smooth.value.x) * 0.06
-  smooth.value.y += (mouse.value.y - smooth.value.y) * 0.06
+const resetMouse = () => {
+  mouse.value = { x: 0, y: 0 }
+}
 
-  frame = requestAnimationFrame(animate)
+const animate = () => {
+  const dx = mouse.value.x - smooth.value.x
+  const dy = mouse.value.y - smooth.value.y
+
+  smooth.value.x += dx * 0.08
+  smooth.value.y += dy * 0.08
+
+  // Stop RAF whenSettled to free JS main-thread
+  if (Math.abs(dx) > 0.001 || Math.abs(dy) > 0.001) {
+    frame = requestAnimationFrame(animate)
+  } else {
+    frame = null
+  }
 }
 
 const parallax = (x = 10, y = 10) => ({
-  transform: `
-    translate3d(
-      ${smooth.value.x * x}px,
-      ${smooth.value.y * y}px,
-      0
-    )
-  `,
+  transform: `translate3d(${smooth.value.x * x}px, ${smooth.value.y * y}px, 0)`,
 })
 
 onMounted(() => {
-  window.addEventListener('mousemove', handleMouseMove)
-  window.addEventListener('mouseleave', resetMouse)
-
-  frame = requestAnimationFrame(animate)
+  isFinePointer = window.matchMedia && window.matchMedia('(pointer: fine)').matches
+  if (isFinePointer) {
+    window.addEventListener('mousemove', handleMouseMove, { passive: true })
+    window.addEventListener('mouseleave', resetMouse)
+  }
 })
 
 onUnmounted(() => {
-  window.removeEventListener('mousemove', handleMouseMove)
-  window.removeEventListener('mouseleave', resetMouse)
-
-  if (frame) cancelAnimationFrame(frame)
+  if (isFinePointer) {
+    window.removeEventListener('mousemove', handleMouseMove)
+    window.removeEventListener('mouseleave', resetMouse)
+  }
+  if (frame) {
+    cancelAnimationFrame(frame)
+    frame = null
+  }
 })
 </script>
 
 <template>
   <section ref="heroRef" class="relative isolate overflow-hidden bg-[#050505] text-white">
     <!-- =====================================================
-         BACKGROUND
+         BACKGROUND (GPU Accelerated)
     ====================================================== -->
 
     <div class="pointer-events-none absolute inset-0">
-      <!-- Gold Ambient Glow -->
-
-      <motion.div
-        class="absolute left-1/2 top-[42%] h-[55vw] w-[55vw] max-h-[700px] max-w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#D4AF37]/[0.045] blur-[130px]"
-        :animate="{
-          scale: [1, 1.12, 1],
-          opacity: [0.5, 0.9, 0.5],
-        }"
-        :transition="{
-          duration: 7,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }"
+      <!-- Gold Ambient Glow (CSS Keyframe for 0 TBT) -->
+      <div
+        class="animate-pulse-glow absolute left-1/2 top-[42%] h-[55vw] w-[55vw] max-h-[700px] max-w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#D4AF37]/[0.045] blur-[130px] gpu-accelerated"
       />
 
-      <!-- Secondary Gold Glow -->
-
-      <motion.div
-        class="absolute left-1/2 top-1/2 h-[30vw] w-[30vw] max-h-[400px] max-w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#D4AF37]/[0.025] blur-[100px]"
-        :animate="{
-          scale: [1.1, 0.9, 1.1],
-          x: [-20, 20, -20],
-          y: [10, -10, 10],
-        }"
-        :transition="{
-          duration: 9,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }"
+      <!-- Secondary Gold Glow (CSS Keyframe for 0 TBT) -->
+      <div
+        class="animate-pulse-glow-sec absolute left-1/2 top-1/2 h-[30vw] w-[30vw] max-h-[400px] max-w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#D4AF37]/[0.025] blur-[100px] gpu-accelerated"
       />
 
       <!-- Grid -->
-
       <div
         class="absolute inset-0 opacity-[0.12]"
         style="
@@ -126,21 +102,11 @@ onUnmounted(() => {
       />
 
       <!-- Grid Moving Highlight -->
-
-      <motion.div
-        class="absolute left-1/2 top-0 h-full w-px bg-gradient-to-b from-transparent via-[#D4AF37]/10 to-transparent"
-        :animate="{
-          opacity: [0.2, 0.6, 0.2],
-        }"
-        :transition="{
-          duration: 4,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }"
+      <div
+        class="animate-pulse-glow absolute left-1/2 top-0 h-full w-px bg-gradient-to-b from-transparent via-[#D4AF37]/10 to-transparent"
       />
 
       <!-- Vignette -->
-
       <div
         class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_15%,#050505_82%)]"
       />
@@ -150,48 +116,21 @@ onUnmounted(() => {
          HEADER
     ====================================================== -->
 
-    <motion.header
+    <header
       class="relative z-30 mx-auto flex h-16 w-[92%] max-w-[1400px] items-center justify-between border-b border-white/10 lg:h-[72px]"
-      :initial="{
-        opacity: 0,
-        y: -20,
-      }"
-      :animate="{
-        opacity: 1,
-        y: 0,
-      }"
-      :transition="{
-        duration: 0.8,
-        ease: 'easeOut',
-      }"
     >
-      <motion.div
-        class="flex items-center gap-2"
-        :whileHover="{
-          scale: 1.03,
-        }"
-      >
+      <div class="flex items-center gap-2">
         <span class="h-2 w-2 rounded-full bg-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,.8)]" />
 
         <span class="font-mono text-[8px] uppercase tracking-[0.25em] text-zinc-500">
           Digital Systems
         </span>
-      </motion.div>
+      </div>
 
-      <motion.div
-        class="font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-600"
-        :animate="{
-          opacity: [0.4, 1, 0.4],
-        }"
-        :transition="{
-          duration: 3,
-          repeat: Infinity,
-          ease: 'easeInOut',
-        }"
-      >
+      <div class="font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-600 animate-pulse">
         Available For Projects
-      </motion.div>
-    </motion.header>
+      </div>
+    </header>
 
     <!-- =====================================================
          HERO
@@ -205,134 +144,28 @@ onUnmounted(() => {
              CENTER CONTENT
         ================================================== -->
 
-        <motion.div
-          class="relative z-20 flex w-full max-w-[780px] flex-col items-center text-center"
-          :initial="{
-            opacity: 0,
-            y: 50,
-          }"
-          :animate="{
-            opacity: 1,
-            y: 0,
-          }"
-          :transition="{
-            duration: 1,
-            ease: 'easeOut',
-          }"
-        >
+        <div class="relative z-20 flex w-full max-w-[780px] flex-col items-center text-center">
           <!-- LABEL -->
-
-          <motion.div
+          <div
             class="mb-6 inline-flex items-center gap-2 border border-[#D4AF37]/30 bg-[#D4AF37]/5 px-3 py-2 backdrop-blur-md"
-            :initial="{
-              opacity: 0,
-              y: 20,
-              scale: 0.95,
-            }"
-            :animate="{
-              opacity: 1,
-              y: 0,
-              scale: 1,
-            }"
-            :transition="{
-              duration: 0.7,
-              delay: 0.15,
-              ease: 'easeOut',
-            }"
           >
-            <motion.div
-              :animate="{
-                rotate: [0, 15, -15, 0],
-                scale: [1, 1.15, 1],
-              }"
-              :transition="{
-                duration: 3,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }"
-            >
-              <Sparkles :size="12" class="text-[#D4AF37]" />
-            </motion.div>
+            <Sparkles :size="12" class="text-[#D4AF37] animate-pulse" />
 
             <span
               class="font-mono text-[8px] uppercase tracking-[0.2em] text-[#D4AF37] sm:text-[9px]"
             >
               Independent Digital Lab
             </span>
-          </motion.div>
+          </div>
 
-          <!-- HEADING -->
-
-          <motion.h1
-            class="text-[clamp(3rem,6vw,6.7rem)] font-black uppercase leading-[0.88] tracking-[-0.065em]"
-            :initial="{
-              opacity: 0,
-            }"
-            :animate="{
-              opacity: 1,
-            }"
-            :transition="{
-              duration: 0.3,
-              delay: 0.3,
-            }"
+          <!-- HEADING (Immediate Paint for Maximum LCP Score) -->
+          <h1
+            class="text-[clamp(3rem,6vw,6.7rem)] font-black uppercase leading-[0.88] tracking-[-0.065em] text-white"
           >
-            <motion.span
-              class="block"
-              :initial="{
-                opacity: 0,
-                y: 70,
-              }"
-              :animate="{
-                opacity: 1,
-                y: 0,
-              }"
-              :transition="{
-                duration: 0.8,
-                delay: 0.35,
-                ease: 'easeOut',
-              }"
-            >
-              Your Idea
-            </motion.span>
-
-            <motion.span
-              class="block"
-              :initial="{
-                opacity: 0,
-                y: 70,
-              }"
-              :animate="{
-                opacity: 1,
-                y: 0,
-              }"
-              :transition="{
-                duration: 0.8,
-                delay: 0.48,
-                ease: 'easeOut',
-              }"
-            >
-              Deserves More
-            </motion.span>
-
-            <motion.span
-              class="block"
-              :initial="{
-                opacity: 0,
-                y: 70,
-              }"
-              :animate="{
-                opacity: 1,
-                y: 0,
-              }"
-              :transition="{
-                duration: 0.8,
-                delay: 0.61,
-                ease: 'easeOut',
-              }"
-            >
-              Than A Template.
-            </motion.span>
-          </motion.h1>
+            <span class="block">Your Idea</span>
+            <span class="block">Deserves More</span>
+            <span class="block text-[#D4AF37]">Than A Template.</span>
+          </h1>
 
           <!-- DESCRIPTION -->
 
@@ -489,7 +322,7 @@ onUnmounted(() => {
 
             <span>Engineering</span>
           </motion.div>
-        </motion.div>
+        </div>
 
         <!-- =================================================
              WEBSITE

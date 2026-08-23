@@ -1,18 +1,18 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, defineAsyncComponent } from 'vue'
 import { Sparkles, ArrowRight, CheckCircle2, Search, PenTool, Code2, Rocket } from 'lucide-vue-next'
+import { motion } from 'motion-v'
 
-import CursorGlow from '@/components/common/CursorGlow.vue'
 import Header from '@/components/layout/Header.vue'
 import Hero3D from '@/components/home/Hero3D.vue'
-import BrandMarquee from '@/components/home/BrandMarquee.vue'
-import FeaturedWork from '@/components/home/FeaturedWork.vue'
-import Services from '@/components/home/Services.vue'
-import Philosophy from '@/components/home/Philosophy.vue'
-import ContactSection from '@/components/home/ContactSection.vue'
-import CostEstimatorModal from '@/components/home/CostEstimatorModal.vue'
 import Footer from '@/components/layout/Footer.vue'
-import { motion } from 'motion-v'
+
+// Async Component Loading for Sub-100ms Hydration & TBT Reduction
+const BrandMarquee = defineAsyncComponent(() => import('@/components/home/BrandMarquee.vue'))
+const Services = defineAsyncComponent(() => import('@/components/home/Services.vue'))
+const Philosophy = defineAsyncComponent(() => import('@/components/home/Philosophy.vue'))
+const ContactSection = defineAsyncComponent(() => import('@/components/home/ContactSection.vue'))
+const CostEstimatorModal = defineAsyncComponent(() => import('@/components/home/CostEstimatorModal.vue'))
 
 const isEstimatorOpen = ref(false)
 const isContactOpen = ref(false)
@@ -77,7 +77,6 @@ const process = [
   <div
     class="relative min-h-screen bg-[#030303] text-white selection:bg-[#D4AF37] selection:text-black"
   >
-    <CursorGlow />
     <Header @open-estimator="openEstimator" @open-contact="openContact" />
 
     <main>
