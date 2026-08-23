@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import {
   X,
   Check,
@@ -15,6 +15,9 @@ import {
   ShoppingCart,
   Code2,
   CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Send,
 } from 'lucide-vue-next'
 
 import { formatCurrency } from '@/stores/currencyStore.js'
@@ -29,11 +32,26 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 /* -------------------------------------------------------
+   CONFIG
+------------------------------------------------------- */
+
+const API_URL = '/api/estimate'
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY
+
+/* -------------------------------------------------------
    STATE
 ------------------------------------------------------- */
 
 const currentStep = ref(1)
 const isSubmitted = ref(false)
+const isSubmitting = ref(false)
+const errorMessage = ref('')
+
+const fieldErrors = ref({
+  name: '',
+  email: '',
+})
 
 const selectedType = ref('landing')
 const selectedTimeline = ref('standard')
@@ -149,6 +167,10 @@ const selectedDelivery = computed(() => {
   return timelines.find((item) => item.id === selectedTimeline.value) || timelines[0]
 })
 
+const selectedAddonDetails = computed(() => {
+  return addons.filter((item) => selectedAddons.value.includes(item.id))
+})
+
 const calculatedUsd = computed(() => {
   let total = selectedProject.value.baseUsd * selectedDelivery.value.mult
 
@@ -178,6 +200,222 @@ const calculatedInr = computed(() => {
 })
 
 /* -------------------------------------------------------
+   TURNSTILE STATE
+------------------------------------------------------- */
+
+const turnstileToken = ref('')
+const turnstileReady = ref(false)
+const turnstileContainer = ref(null)
+
+let turnstileWidgetId = null
+
+/* -------------------------------------------------------
+   LOAD TURNSTILE
+------------------------------------------------------- */
+
+const loadTurnstileScript = () => {
+  return new Promise((resolve, reject) => {
+    if (window.turnstile) {
+      turnstileReady.value = true
+      resolve()
+      return
+    }
+
+    const existingScript = document.querySelector(
+      'script[src*="challenges.cloudflare.com/turnstile/v0/api.js"]',
+    )
+
+    if (existingScript) {
+      const checkReady = setInterval(() => {
+        if (window.turnstile) {
+          clearInterval(checkReady)
+
+          turnstileReady.value = true
+          resolve()
+        }
+      }, 100)
+
+      setTimeout(() => {
+        clearInterval(checkReady)
+
+        if (!window.turnstile) {
+          reject(new Error('Cloudflare Turnstile failed to load.'))
+        }
+      }, 10000)
+
+      return
+    }
+
+    const script = document.createElement('script')
+
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
+
+    script.async = true
+    script.defer = true
+
+    script.onload = () => {
+      turnstileReady.value = true
+      resolve()
+    }
+
+    script.onerror = () => {
+      reject(new Error('Unable to load Cloudflare Turnstile.'))
+    }
+
+    document.head.appendChild(script)
+  })
+}
+
+/* -------------------------------------------------------
+   RENDER / RESET TURNSTILE
+------------------------------------------------------- */
+
+const renderTurnstile = async (container) => {
+  if (!container || !window.turnstile) return
+
+  if (!TURNSTILE_SITE_KEY) {
+    console.error('VITE_TURNSTILE_SITE_KEY is missing.')
+
+    errorMessage.value = 'Security verification is not configured correctly.'
+
+    return
+  }
+
+  try {
+    container.innerHTML = ''
+
+    turnstileWidgetId = window.turnstile.render(container, {
+      sitekey: TURNSTILE_SITE_KEY,
+
+      theme: 'dark',
+
+      size: 'flexible',
+
+      callback: (token) => {
+        turnstileToken.value = token
+        errorMessage.value = ''
+      },
+
+      'expired-callback': () => {
+        turnstileToken.value = ''
+        errorMessage.value = 'Security verification expired. Please verify again.'
+      },
+
+      'timeout-callback': () => {
+        turnstileToken.value = ''
+        errorMessage.value = 'Security verification timed out. Please try again.'
+      },
+
+      'error-callback': () => {
+        turnstileToken.value = ''
+        errorMessage.value = 'Security verification failed. Please try again.'
+      },
+    })
+  } catch (error) {
+    console.error('Turnstile render error:', error)
+
+    errorMessage.value = 'Security verification could not be loaded.'
+  }
+}
+
+const resetTurnstile = () => {
+  try {
+    if (!window.turnstile) return
+
+    if (turnstileWidgetId !== null && turnstileWidgetId !== undefined) {
+      window.turnstile.reset(turnstileWidgetId)
+    }
+
+    turnstileToken.value = ''
+  } catch (error) {
+    console.error('Turnstile reset error:', error)
+  }
+}
+
+const initializeTurnstile = async () => {
+  try {
+    await loadTurnstileScript()
+
+    await nextTick()
+
+    if (turnstileContainer.value) {
+      await renderTurnstile(turnstileContainer.value)
+    }
+  } catch (error) {
+    console.error(error)
+
+    errorMessage.value = 'Security verification could not be loaded. Please refresh and try again.'
+  }
+}
+
+/* -------------------------------------------------------
+   SAFE JSON RESPONSE
+------------------------------------------------------- */
+
+const parseResponse = async (response) => {
+  const text = await response.text()
+
+  if (!text) {
+    return {
+      success: false,
+      message: `Server returned ${response.status} ${response.statusText}`,
+    }
+  }
+
+  try {
+    return JSON.parse(text)
+  } catch {
+    return {
+      success: false,
+      message: 'The server returned an invalid response.',
+      raw: text,
+    }
+  }
+}
+
+/* -------------------------------------------------------
+   VALIDATION
+------------------------------------------------------- */
+
+const validateEmail = (email) => {
+  const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+
+  return pattern.test(email)
+}
+
+const clearFieldError = (field) => {
+  fieldErrors.value[field] = ''
+  errorMessage.value = ''
+}
+
+const validateStepThree = () => {
+  fieldErrors.value = { name: '', email: '' }
+
+  let valid = true
+
+  const name = clientName.value.trim()
+  const email = clientEmail.value.trim()
+
+  if (!name) {
+    fieldErrors.value.name = 'Please enter your name.'
+    valid = false
+  } else if (name.length < 2) {
+    fieldErrors.value.name = 'Name must contain at least 2 characters.'
+    valid = false
+  }
+
+  if (!email) {
+    fieldErrors.value.email = 'Please enter your email.'
+    valid = false
+  } else if (!validateEmail(email)) {
+    fieldErrors.value.email = 'Please enter a valid email address.'
+    valid = false
+  }
+
+  return valid
+}
+
+/* -------------------------------------------------------
    ACTIONS
 ------------------------------------------------------- */
 
@@ -201,15 +439,91 @@ const previousStep = () => {
   }
 }
 
-const handleSubmit = () => {
-  if (!clientName.value || !clientEmail.value) return
+/* -------------------------------------------------------
+   SUBMIT
+------------------------------------------------------- */
 
-  isSubmitted.value = true
+const handleSubmit = async () => {
+  if (isSubmitting.value) {
+    return
+  }
+
+  errorMessage.value = ''
+
+  const isValid = validateStepThree()
+
+  if (!isValid) {
+    errorMessage.value = 'Please correct the highlighted fields.'
+    return
+  }
+
+  if (!turnstileToken.value) {
+    errorMessage.value = 'Please complete the security verification.'
+    return
+  }
+
+  isSubmitting.value = true
+
+  try {
+    const payload = {
+      name: clientName.value.trim(),
+      email: clientEmail.value.trim(),
+      company: clientOrg.value.trim(),
+      notes: clientNotes.value.trim(),
+
+      projectType: selectedProject.value.id,
+      projectLabel: selectedProject.value.label,
+
+      timeline: selectedDelivery.value.id,
+      timelineLabel: selectedDelivery.value.label,
+
+      addons: selectedAddonDetails.value.map((addon) => addon.id),
+      addonLabels: selectedAddonDetails.value.map((addon) => addon.label),
+
+      estimateUsd: calculatedUsd.value,
+      estimateInr: calculatedInr.value,
+
+      turnstileToken: turnstileToken.value,
+    }
+
+    const response = await fetch(API_URL, {
+      method: 'POST',
+
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+
+      body: JSON.stringify(payload),
+    })
+
+    const result = await parseResponse(response)
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || `Request failed with status ${response.status}`)
+    }
+
+    isSubmitted.value = true
+
+    resetTurnstile()
+  } catch (error) {
+    console.error('Estimate submission error:', error)
+
+    errorMessage.value = error?.message || 'Something went wrong. Please try again later.'
+
+    resetTurnstile()
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
 const resetEstimator = () => {
   currentStep.value = 1
   isSubmitted.value = false
+  isSubmitting.value = false
+  errorMessage.value = ''
+
+  fieldErrors.value = { name: '', email: '' }
 
   selectedType.value = 'landing'
   selectedTimeline.value = 'standard'
@@ -219,9 +533,12 @@ const resetEstimator = () => {
   clientEmail.value = ''
   clientOrg.value = ''
   clientNotes.value = ''
+
+  turnstileToken.value = ''
 }
 
 const closeModal = () => {
+  resetTurnstile()
   resetEstimator()
   emit('close')
 }
@@ -238,8 +555,22 @@ const handleEscape = (event) => {
 
 watch(
   () => props.isOpen,
-  (open) => {
+  async (open) => {
     document.body.style.overflow = open ? 'hidden' : ''
+
+    if (open) {
+      await nextTick()
+
+      setTimeout(async () => {
+        if (turnstileContainer.value && turnstileReady.value) {
+          await renderTurnstile(turnstileContainer.value)
+        } else if (!turnstileReady.value) {
+          await initializeTurnstile()
+        }
+      }, 150)
+    } else {
+      resetTurnstile()
+    }
   },
   { immediate: true },
 )
@@ -254,14 +585,41 @@ watch(
         element.scrollTop = 0
       }
     })
+
+    // Turnstile widget lives in step 3 — (re)render it when the user reaches that step
+    if (currentStep.value === 3) {
+      nextTick(() => {
+        setTimeout(async () => {
+          if (turnstileContainer.value && turnstileReady.value) {
+            await renderTurnstile(turnstileContainer.value)
+          } else if (!turnstileReady.value) {
+            await initializeTurnstile()
+          }
+        }, 100)
+      })
+    }
   },
 )
 
 window.addEventListener('keydown', handleEscape)
 
+onMounted(async () => {
+  if (props.isOpen) {
+    await initializeTurnstile()
+  }
+})
+
 onBeforeUnmount(() => {
   document.body.style.overflow = ''
   window.removeEventListener('keydown', handleEscape)
+
+  try {
+    if (window.turnstile && turnstileWidgetId !== null && turnstileWidgetId !== undefined) {
+      window.turnstile.remove(turnstileWidgetId)
+    }
+  } catch (error) {
+    console.error('Turnstile cleanup error:', error)
+  }
 })
 </script>
 
@@ -660,9 +1018,25 @@ onBeforeUnmount(() => {
                         v-model="clientName"
                         required
                         type="text"
+                        maxlength="80"
+                        autocomplete="name"
                         placeholder="Your name"
-                        class="w-full rounded-xl border border-white/[0.08] bg-[#0A0A0E] px-4 py-3 text-xs text-white outline-none transition focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/10"
+                        :class="[
+                          'w-full rounded-xl border bg-[#0A0A0E] px-4 py-3 text-xs text-white outline-none transition focus:ring-1',
+                          fieldErrors.name
+                            ? 'border-red-500/50 focus:ring-red-500/10'
+                            : 'border-white/[0.08] focus:border-[#D4AF37]/50 focus:ring-[#D4AF37]/10',
+                        ]"
+                        @input="clearFieldError('name')"
                       />
+
+                      <p
+                        v-if="fieldErrors.name"
+                        class="mt-1.5 flex items-center gap-1 text-[9px] text-red-400"
+                      >
+                        <AlertCircle :size="11" />
+                        {{ fieldErrors.name }}
+                      </p>
                     </div>
 
                     <div>
@@ -676,9 +1050,25 @@ onBeforeUnmount(() => {
                         v-model="clientEmail"
                         required
                         type="email"
+                        maxlength="150"
+                        autocomplete="email"
                         placeholder="you@company.com"
-                        class="w-full rounded-xl border border-white/[0.08] bg-[#0A0A0E] px-4 py-3 text-xs text-white outline-none transition focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/10"
+                        :class="[
+                          'w-full rounded-xl border bg-[#0A0A0E] px-4 py-3 text-xs text-white outline-none transition focus:ring-1',
+                          fieldErrors.email
+                            ? 'border-red-500/50 focus:ring-red-500/10'
+                            : 'border-white/[0.08] focus:border-[#D4AF37]/50 focus:ring-[#D4AF37]/10',
+                        ]"
+                        @input="clearFieldError('email')"
                       />
+
+                      <p
+                        v-if="fieldErrors.email"
+                        class="mt-1.5 flex items-center gap-1 text-[9px] text-red-400"
+                      >
+                        <AlertCircle :size="11" />
+                        {{ fieldErrors.email }}
+                      </p>
                     </div>
                   </div>
 
@@ -692,6 +1082,8 @@ onBeforeUnmount(() => {
                     <input
                       v-model="clientOrg"
                       type="text"
+                      maxlength="120"
+                      autocomplete="organization"
                       placeholder="Company name"
                       class="w-full rounded-xl border border-white/[0.08] bg-[#0A0A0E] px-4 py-3 text-xs text-white outline-none transition focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/10"
                     />
@@ -707,10 +1099,43 @@ onBeforeUnmount(() => {
                     <textarea
                       v-model="clientNotes"
                       rows="4"
+                      maxlength="3000"
                       placeholder="Tell us briefly about your project..."
                       class="w-full resize-none rounded-xl border border-white/[0.08] bg-[#0A0A0E] px-4 py-3 text-xs leading-relaxed text-white outline-none transition focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/10"
                     ></textarea>
                   </div>
+
+                  <!-- TURNSTILE -->
+
+                  <div>
+                    <div
+                      class="flex w-full items-start justify-start overflow-visible pt-1 text-left"
+                    >
+                      <div
+                        ref="turnstileContainer"
+                        class="turnstile-left flex min-h-[65px] w-auto items-start justify-start"
+                      ></div>
+                    </div>
+                  </div>
+
+                  <!-- ERROR -->
+
+                  <Transition
+                    enter-active-class="transition duration-200 ease-out"
+                    enter-from-class="opacity-0 -translate-y-1"
+                    enter-to-class="opacity-100 translate-y-0"
+                  >
+                    <div
+                      v-if="errorMessage"
+                      class="flex items-start gap-2 rounded-xl border border-red-500/20 bg-red-500/[0.04] px-4 py-3"
+                    >
+                      <AlertCircle :size="14" class="mt-0.5 shrink-0 text-red-400" />
+
+                      <p class="text-[10px] leading-relaxed text-red-400">
+                        {{ errorMessage }}
+                      </p>
+                    </div>
+                  </Transition>
                 </div>
               </Transition>
 
@@ -722,7 +1147,8 @@ onBeforeUnmount(() => {
                 <button
                   v-if="currentStep > 1"
                   type="button"
-                  class="group flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-zinc-600 transition hover:text-white"
+                  :disabled="isSubmitting"
+                  class="group flex items-center gap-2 text-[9px] font-bold uppercase tracking-widest text-zinc-600 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
                   @click="previousStep"
                 >
                   <ArrowLeft :size="13" class="transition group-hover:-translate-x-1" />
@@ -746,13 +1172,17 @@ onBeforeUnmount(() => {
                 <button
                   v-else
                   type="button"
-                  :disabled="!clientName || !clientEmail"
-                  class="group flex items-center gap-2 rounded-xl bg-[#D4AF37] px-6 py-3 text-[9px] font-black uppercase tracking-widest text-black transition-all hover:bg-[#E4C55A] disabled:cursor-not-allowed disabled:opacity-40"
+                  :disabled="isSubmitting || !clientName || !clientEmail || !turnstileToken"
+                  class="group flex min-w-[190px] items-center justify-center gap-2 rounded-xl bg-[#D4AF37] px-6 py-3 text-[9px] font-black uppercase tracking-widest text-black transition-all hover:bg-[#E4C55A] disabled:cursor-not-allowed disabled:opacity-40"
                   @click="handleSubmit"
                 >
-                  Generate Estimate
+                  <Loader2 v-if="isSubmitting" :size="14" class="animate-spin" />
 
-                  <Check :size="13" class="transition group-hover:scale-110" />
+                  <template v-else>
+                    Generate Estimate
+
+                    <Send :size="13" class="transition group-hover:translate-x-1" />
+                  </template>
                 </button>
               </div>
             </div>
@@ -881,3 +1311,28 @@ onBeforeUnmount(() => {
     </div>
   </Transition>
 </template>
+
+<style scoped>
+.turnstile-left {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  text-align: left !important;
+}
+
+.turnstile-left > div {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  text-align: left !important;
+}
+
+.turnstile-left iframe {
+  display: block !important;
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+
+.turnstile-left [style*='margin'] {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+</style>
