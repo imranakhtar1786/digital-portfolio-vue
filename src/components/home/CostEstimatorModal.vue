@@ -35,7 +35,7 @@ const emit = defineEmits(['close'])
    CONFIG
 ------------------------------------------------------- */
 
-const API_URL = '/api/estimate'
+const API_URL = '/api/contact'
 
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY
 
