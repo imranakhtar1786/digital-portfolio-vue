@@ -559,15 +559,15 @@ watch(
     document.body.style.overflow = open ? 'hidden' : ''
 
     if (open) {
+      // Container is now permanently mounted (see template), so a single
+      // init after the DOM settles is enough — no per-step race anymore.
       await nextTick()
 
-      setTimeout(async () => {
-        if (turnstileContainer.value && turnstileReady.value) {
-          await renderTurnstile(turnstileContainer.value)
-        } else if (!turnstileReady.value) {
-          await initializeTurnstile()
-        }
-      }, 150)
+      if (turnstileReady.value && turnstileContainer.value) {
+        await renderTurnstile(turnstileContainer.value)
+      } else {
+        await initializeTurnstile()
+      }
     } else {
       resetTurnstile()
     }
@@ -585,19 +585,6 @@ watch(
         element.scrollTop = 0
       }
     })
-
-    // Turnstile widget lives in step 3 — (re)render it when the user reaches that step
-    if (currentStep.value === 3) {
-      nextTick(() => {
-        setTimeout(async () => {
-          if (turnstileContainer.value && turnstileReady.value) {
-            await renderTurnstile(turnstileContainer.value)
-          } else if (!turnstileReady.value) {
-            await initializeTurnstile()
-          }
-        }, 100)
-      })
-    }
   },
 )
 
@@ -1104,40 +1091,43 @@ onBeforeUnmount(() => {
                       class="w-full resize-none rounded-xl border border-white/[0.08] bg-[#0A0A0E] px-4 py-3 text-xs leading-relaxed text-white outline-none transition focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/10"
                     ></textarea>
                   </div>
-
-                  <!-- TURNSTILE -->
-
-                  <div>
-                    <div
-                      class="flex w-full items-start justify-start overflow-visible pt-1 text-left"
-                    >
-                      <div
-                        ref="turnstileContainer"
-                        class="turnstile-left flex min-h-[65px] w-auto items-start justify-start"
-                      ></div>
-                    </div>
-                  </div>
-
-                  <!-- ERROR -->
-
-                  <Transition
-                    enter-active-class="transition duration-200 ease-out"
-                    enter-from-class="opacity-0 -translate-y-1"
-                    enter-to-class="opacity-100 translate-y-0"
-                  >
-                    <div
-                      v-if="errorMessage"
-                      class="flex items-start gap-2 rounded-xl border border-red-500/20 bg-red-500/[0.04] px-4 py-3"
-                    >
-                      <AlertCircle :size="14" class="mt-0.5 shrink-0 text-red-400" />
-
-                      <p class="text-[10px] leading-relaxed text-red-400">
-                        {{ errorMessage }}
-                      </p>
-                    </div>
-                  </Transition>
                 </div>
               </Transition>
+
+              <!-- =================================================
+                   TURNSTILE — permanently mounted (not inside the
+                   stepped Transition above) so the widget survives
+                   step navigation instead of being destroyed and
+                   recreated. Only visible on step 3.
+              ================================================== -->
+
+              <div v-show="currentStep === 3" class="mt-5 space-y-4">
+                <div class="flex w-full items-start justify-start overflow-visible pt-1 text-left">
+                  <div
+                    ref="turnstileContainer"
+                    class="turnstile-left flex min-h-[65px] w-auto items-start justify-start"
+                  ></div>
+                </div>
+
+                <!-- ERROR -->
+
+                <Transition
+                  enter-active-class="transition duration-200 ease-out"
+                  enter-from-class="opacity-0 -translate-y-1"
+                  enter-to-class="opacity-100 translate-y-0"
+                >
+                  <div
+                    v-if="errorMessage"
+                    class="flex items-start gap-2 rounded-xl border border-red-500/20 bg-red-500/[0.04] px-4 py-3"
+                  >
+                    <AlertCircle :size="14" class="mt-0.5 shrink-0 text-red-400" />
+
+                    <p class="text-[10px] leading-relaxed text-red-400">
+                      {{ errorMessage }}
+                    </p>
+                  </div>
+                </Transition>
+              </div>
 
               <!-- =================================================
                    NAVIGATION
