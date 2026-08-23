@@ -588,9 +588,8 @@ watch(
   },
 )
 
-window.addEventListener('keydown', handleEscape)
-
 onMounted(async () => {
+  window.addEventListener('keydown', handleEscape)
   if (props.isOpen) {
     await initializeTurnstile()
   }

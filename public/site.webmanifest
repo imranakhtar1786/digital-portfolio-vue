@@ -1,0 +1,24 @@
+{
+  "name": "Momentum Lab — Digital Agency",
+  "short_name": "Momentum Lab",
+  "description": "Custom Web Development, Mobile Apps, UI/UX Design, SEO Optimization, and Cloud Services by Imran Akhtar.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#030303",
+  "theme_color": "#030303",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icon.webp",
+      "sizes": "192x192",
+      "type": "image/webp",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
