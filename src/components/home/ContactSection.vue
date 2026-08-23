@@ -57,6 +57,7 @@ const contactInfo = {
 const form = ref({
   name: '',
   email: '',
+  phone: '',
   company: '',
   projectType: '',
   message: '',
@@ -79,6 +80,7 @@ const projectTypes = [
 const errors = ref({
   name: '',
   email: '',
+  phone: '',
   company: '',
   projectType: '',
   message: '',
@@ -277,6 +279,7 @@ const clearErrors = () => {
   errors.value = {
     name: '',
     email: '',
+    phone: '',
     company: '',
     projectType: '',
     message: '',
@@ -472,6 +475,8 @@ const submitForm = async () => {
 
       email: form.value.email.trim(),
 
+      phone: form.value.phone.trim(),
+
       company: form.value.company.trim(),
 
       projectType: form.value.projectType,
@@ -546,6 +551,7 @@ const resetForm = async () => {
   form.value = {
     name: '',
     email: '',
+    phone: '',
     company: '',
     projectType: '',
     message: '',
@@ -986,9 +992,8 @@ onBeforeUnmount(() => {
 
               <p class="mt-4 max-w-md text-xs leading-relaxed text-zinc-500 sm:text-sm">
                 Thanks,
-                <span class="text-zinc-300">
-                  {{ form.name }} </span
-                >. Your project details have been received.
+                <span class="text-zinc-300"> {{ form.name }} </span>. Your project details have been
+                received.
               </p>
 
               <button
@@ -1090,37 +1095,70 @@ onBeforeUnmount(() => {
                 </div>
               </div>
 
-              <!-- COMPANY -->
+              <!-- COMPANY & PHONE -->
 
-              <div>
-                <label
-                  class="mb-1.5 block font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-600"
-                >
-                  Company / Brand
-                </label>
+              <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label
+                    class="mb-1.5 block font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-600"
+                  >
+                    Company / Brand
+                  </label>
 
-                <input
-                  v-model="form.company"
-                  type="text"
-                  maxlength="120"
-                  autocomplete="organization"
-                  placeholder="Your company or brand"
-                  :class="[
-                    'w-full rounded-xl border bg-[#0B0B0E] px-4 py-3 text-xs text-white outline-none transition placeholder:text-zinc-700',
-                    errors.company
-                      ? 'border-red-500/50'
-                      : 'border-white/[0.08] focus:border-[#D4AF37]/50',
-                  ]"
-                  @input="clearFieldError('company')"
-                />
+                  <input
+                    v-model="form.company"
+                    type="text"
+                    maxlength="120"
+                    autocomplete="organization"
+                    placeholder="Your company or brand"
+                    :class="[
+                      'w-full rounded-xl border bg-[#0B0B0E] px-4 py-3 text-xs text-white outline-none transition placeholder:text-zinc-700',
+                      errors.company
+                        ? 'border-red-500/50'
+                        : 'border-white/[0.08] focus:border-[#D4AF37]/50',
+                    ]"
+                    @input="clearFieldError('company')"
+                  />
 
-                <p
-                  v-if="errors.company"
-                  class="mt-1.5 flex items-center gap-1 text-[9px] text-red-400"
-                >
-                  <AlertCircle :size="11" />
-                  {{ errors.company }}
-                </p>
+                  <p
+                    v-if="errors.company"
+                    class="mt-1.5 flex items-center gap-1 text-[9px] text-red-400"
+                  >
+                    <AlertCircle :size="11" />
+                    {{ errors.company }}
+                  </p>
+                </div>
+
+                <div>
+                  <label
+                    class="mb-1.5 block font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-600"
+                  >
+                    Phone Number
+                  </label>
+
+                  <input
+                    v-model="form.phone"
+                    type="tel"
+                    maxlength="30"
+                    autocomplete="tel"
+                    placeholder="+91 98765 43210"
+                    :class="[
+                      'w-full rounded-xl border bg-[#0B0B0E] px-4 py-3 text-xs text-white outline-none transition placeholder:text-zinc-700',
+                      errors.phone
+                        ? 'border-red-500/50'
+                        : 'border-white/[0.08] focus:border-[#D4AF37]/50',
+                    ]"
+                    @input="clearFieldError('phone')"
+                  />
+
+                  <p
+                    v-if="errors.phone"
+                    class="mt-1.5 flex items-center gap-1 text-[9px] text-red-400"
+                  >
+                    <AlertCircle :size="11" />
+                    {{ errors.phone }}
+                  </p>
+                </div>
               </div>
 
               <!-- PROJECT TYPE -->
@@ -1367,9 +1405,7 @@ onBeforeUnmount(() => {
 
             <p class="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-zinc-500">
               Thanks,
-              <span class="text-zinc-300">
-                {{ form.name }} </span
-              >. We'll get back to you soon.
+              <span class="text-zinc-300"> {{ form.name }} </span>. We'll get back to you soon.
             </p>
 
             <button
@@ -1444,33 +1480,62 @@ onBeforeUnmount(() => {
               </p>
             </div>
 
-            <!-- COMPANY -->
+            <!-- COMPANY & PHONE -->
 
-            <div>
-              <label
-                class="mb-2 block font-mono text-[9px] uppercase tracking-widest text-zinc-600"
-              >
-                Company / Brand
-              </label>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label
+                  class="mb-2 block font-mono text-[9px] uppercase tracking-widest text-zinc-600"
+                >
+                  Company / Brand
+                </label>
 
-              <input
-                v-model="form.company"
-                maxlength="120"
-                type="text"
-                autocomplete="organization"
-                placeholder="Your company or brand"
-                :class="[
-                  'w-full rounded-xl border bg-[#0B0B0E] px-4 py-3.5 text-sm text-white outline-none placeholder:text-zinc-700',
-                  errors.company
-                    ? 'border-red-500/50'
-                    : 'border-white/[0.08] focus:border-[#D4AF37]/50',
-                ]"
-                @input="clearFieldError('company')"
-              />
+                <input
+                  v-model="form.company"
+                  maxlength="120"
+                  type="text"
+                  autocomplete="organization"
+                  placeholder="Your company or brand"
+                  :class="[
+                    'w-full rounded-xl border bg-[#0B0B0E] px-4 py-3.5 text-sm text-white outline-none placeholder:text-zinc-700',
+                    errors.company
+                      ? 'border-red-500/50'
+                      : 'border-white/[0.08] focus:border-[#D4AF37]/50',
+                  ]"
+                  @input="clearFieldError('company')"
+                />
 
-              <p v-if="errors.company" class="mt-1.5 text-[9px] text-red-400">
-                {{ errors.company }}
-              </p>
+                <p v-if="errors.company" class="mt-1.5 text-[9px] text-red-400">
+                  {{ errors.company }}
+                </p>
+              </div>
+
+              <div>
+                <label
+                  class="mb-2 block font-mono text-[9px] uppercase tracking-widest text-zinc-600"
+                >
+                  Phone Number
+                </label>
+
+                <input
+                  v-model="form.phone"
+                  maxlength="30"
+                  type="tel"
+                  autocomplete="tel"
+                  placeholder="+91 98765 43210"
+                  :class="[
+                    'w-full rounded-xl border bg-[#0B0B0E] px-4 py-3.5 text-sm text-white outline-none placeholder:text-zinc-700',
+                    errors.phone
+                      ? 'border-red-500/50'
+                      : 'border-white/[0.08] focus:border-[#D4AF37]/50',
+                  ]"
+                  @input="clearFieldError('phone')"
+                />
+
+                <p v-if="errors.phone" class="mt-1.5 text-[9px] text-red-400">
+                  {{ errors.phone }}
+                </p>
+              </div>
             </div>
 
             <!-- PROJECT TYPE -->

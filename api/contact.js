@@ -7,7 +7,25 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { name, email, company, projectType, message, turnstileToken } = req.body || {}
+    const {
+      name,
+      email,
+      phone,
+      company,
+      projectType,
+      projectLabel,
+      message,
+      timeline,
+      timelineLabel,
+      addons,
+      addonLabels,
+      estimateUsd,
+      estimatedUsd,
+      estimateInr,
+      estimatedInr,
+      isEstimator,
+      turnstileToken,
+    } = req.body || {}
 
     // =========================================================
     // VALIDATION
@@ -97,12 +115,24 @@ export default async function handler(req, res) {
     // CONTACT DATA
     // =========================================================
 
+    const formattedAddons = Array.isArray(addonLabels)
+      ? addonLabels.join(', ')
+      : Array.isArray(addons)
+        ? addons.join(', ')
+        : addons || ''
+
     const contactData = {
       name: name.trim(),
       email: email.trim(),
+      phone: phone?.trim() || '',
       company: company?.trim() || '',
-      projectType: projectType || '',
+      projectType: projectLabel || projectType || '',
       message: message?.trim() || '',
+      timeline: timelineLabel || timeline || '',
+      addons: formattedAddons,
+      estimatedUsd: estimatedUsd || estimateUsd || '',
+      estimatedInr: estimatedInr || estimateInr || '',
+      isEstimator: Boolean(isEstimator || timeline || estimatedUsd || estimateUsd),
     }
 
     console.log('Contact data:', {
@@ -143,6 +173,10 @@ export default async function handler(req, res) {
 
     console.log('Sending email through Brevo...')
 
+    const emailSubject = contactData.isEstimator
+      ? `New Cost Estimate Submission — ${contactData.name}`
+      : `New Project Inquiry — ${contactData.name}`
+
     const brevoPayload = {
       sender: {
         name: 'Momentum Lab',
@@ -161,21 +195,21 @@ export default async function handler(req, res) {
         name: contactData.name,
       },
 
-      subject: `New Project Inquiry — ${contactData.name}`,
+      subject: emailSubject,
 
       htmlContent: `
         <div style="font-family:Arial,sans-serif;max-width:650px;margin:auto">
 
           <h2 style="color:#D4AF37">
-            New Project Inquiry
+            ${contactData.isEstimator ? 'New Cost Estimate Submission' : 'New Project Inquiry'}
           </h2>
 
           <p>
-            A new project inquiry has been submitted
+            A new ${contactData.isEstimator ? 'cost estimate' : 'project inquiry'} has been submitted
             through <strong>Momentum Lab</strong>.
           </p>
 
-          <hr>
+          <hr style="border:0;border-top:1px solid #eee;margin:20px 0;">
 
           <p>
             <strong>Name:</strong><br>
@@ -188,6 +222,11 @@ export default async function handler(req, res) {
           </p>
 
           <p>
+            <strong>Phone:</strong><br>
+            ${escapeHtml(contactData.phone || 'Not provided')}
+          </p>
+
+          <p>
             <strong>Company:</strong><br>
             ${escapeHtml(contactData.company || 'Not provided')}
           </p>
@@ -197,12 +236,25 @@ export default async function handler(req, res) {
             ${escapeHtml(contactData.projectType || 'Not specified')}
           </p>
 
+          ${
+            contactData.isEstimator
+              ? `
+          <div style="background:#f9f9f9;padding:15px;border-left:4px solid #D4AF37;margin:15px 0;">
+            <p style="margin:0 0 10px 0;"><strong>Estimator Details:</strong></p>
+            <p style="margin:4px 0;"><strong>Timeline:</strong> ${escapeHtml(contactData.timeline || 'Standard')}</p>
+            <p style="margin:4px 0;"><strong>Add-ons:</strong> ${escapeHtml(contactData.addons || 'None')}</p>
+            <p style="margin:4px 0;"><strong>Calculated Estimate:</strong> $${escapeHtml(String(contactData.estimatedUsd || 0))} USD (${contactData.estimatedInr ? '₹' + escapeHtml(String(contactData.estimatedInr)) + ' INR' : ''})</p>
+          </div>
+          `
+              : ''
+          }
+
           <p>
-            <strong>Project Overview:</strong><br>
+            <strong>Project Overview / Notes:</strong><br>
             ${escapeHtml(contactData.message || 'Not provided')}
           </p>
 
-          <hr>
+          <hr style="border:0;border-top:1px solid #eee;margin:20px 0;">
 
           <p style="font-size:12px;color:#777">
             Momentum Lab · momentumlab.in

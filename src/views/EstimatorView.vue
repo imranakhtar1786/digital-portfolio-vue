@@ -9,6 +9,7 @@ import {
   Building2,
   User,
   Mail,
+  Phone,
   FileText,
 } from 'lucide-vue-next'
 import { Motion } from 'motion-v'
@@ -28,6 +29,7 @@ const submitError = ref('')
 const clientName = ref('')
 const clientCompany = ref('')
 const clientEmail = ref('')
+const clientPhone = ref('')
 const clientNotes = ref('')
 
 const projectTypes = [
@@ -158,6 +160,7 @@ const resetCalculator = () => {
   clientName.value = ''
   clientCompany.value = ''
   clientEmail.value = ''
+  clientPhone.value = ''
   clientNotes.value = ''
 
   selectedCategory.value = 'landing'
@@ -189,6 +192,7 @@ const handleSubmit = () => {
     name: clientName.value,
     company: clientCompany.value,
     email: clientEmail.value,
+    phone: clientPhone.value,
     requirements: clientNotes.value,
     projectType: selectedProject.value.label,
     timeline: selectedTimelineData.value.label,
@@ -535,9 +539,9 @@ const handleSubmit = () => {
                 </div>
               </div>
 
-              <!-- Name / Company / Email -->
+              <!-- Name / Company / Email / Phone -->
 
-              <div class="mt-7 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <div class="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <!-- Name -->
 
                 <div>
@@ -557,25 +561,6 @@ const handleSubmit = () => {
                   />
                 </div>
 
-                <!-- Company -->
-
-                <div>
-                  <label
-                    class="mb-2 flex items-center gap-2 text-[10px] font-medium uppercase tracking-wider text-zinc-500"
-                  >
-                    <Building2 :size="12" />
-
-                    Company / Business
-                  </label>
-
-                  <input
-                    v-model="clientCompany"
-                    type="text"
-                    placeholder="Company name"
-                    class="h-12 w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 text-xs text-white outline-none transition placeholder:text-zinc-700 focus:border-[#D4AF37]/60"
-                  />
-                </div>
-
                 <!-- Email -->
 
                 <div>
@@ -591,6 +576,44 @@ const handleSubmit = () => {
                     v-model="clientEmail"
                     type="email"
                     placeholder="you@company.com"
+                    class="h-12 w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 text-xs text-white outline-none transition placeholder:text-zinc-700 focus:border-[#D4AF37]/60"
+                  />
+                </div>
+
+                <!-- Phone -->
+
+                <div>
+                  <label
+                    class="mb-2 flex items-center gap-2 text-[10px] font-medium uppercase tracking-wider text-zinc-500"
+                  >
+                    <Phone :size="12" />
+
+                    Phone Number
+                  </label>
+
+                  <input
+                    v-model="clientPhone"
+                    type="tel"
+                    placeholder="+91 98765 43210"
+                    class="h-12 w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 text-xs text-white outline-none transition placeholder:text-zinc-700 focus:border-[#D4AF37]/60"
+                  />
+                </div>
+
+                <!-- Company -->
+
+                <div>
+                  <label
+                    class="mb-2 flex items-center gap-2 text-[10px] font-medium uppercase tracking-wider text-zinc-500"
+                  >
+                    <Building2 :size="12" />
+
+                    Company / Business
+                  </label>
+
+                  <input
+                    v-model="clientCompany"
+                    type="text"
+                    placeholder="Company name"
                     class="h-12 w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 text-xs text-white outline-none transition placeholder:text-zinc-700 focus:border-[#D4AF37]/60"
                   />
                 </div>

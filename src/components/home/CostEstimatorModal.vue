@@ -59,6 +59,7 @@ const selectedAddons = ref(['seo'])
 
 const clientName = ref('')
 const clientEmail = ref('')
+const clientPhone = ref('')
 const clientOrg = ref('')
 const clientNotes = ref('')
 
@@ -468,6 +469,7 @@ const handleSubmit = async () => {
     const payload = {
       name: clientName.value.trim(),
       email: clientEmail.value.trim(),
+      phone: clientPhone.value.trim(),
       company: clientOrg.value.trim(),
       message: clientNotes.value.trim(),
 
@@ -481,7 +483,11 @@ const handleSubmit = async () => {
       addonLabels: selectedAddonDetails.value.map((addon) => addon.label),
 
       estimateUsd: calculatedUsd.value,
+      estimatedUsd: calculatedUsd.value,
       estimateInr: calculatedInr.value,
+      estimatedInr: calculatedInr.value,
+
+      isEstimator: true,
 
       turnstileToken: turnstileToken.value,
     }
@@ -499,9 +505,16 @@ const handleSubmit = async () => {
 
     const result = await parseResponse(response)
 
+    console.log('Estimate API response:', {
+      status: response.status,
+      result,
+    })
+
     if (!response.ok || !result.success) {
       throw new Error(result.message || `Request failed with status ${response.status}`)
     }
+
+    /* SUCCESS */
 
     isSubmitted.value = true
 
@@ -531,6 +544,7 @@ const resetEstimator = () => {
 
   clientName.value = ''
   clientEmail.value = ''
+  clientPhone.value = ''
   clientOrg.value = ''
   clientNotes.value = ''
 
@@ -1058,21 +1072,40 @@ onBeforeUnmount(() => {
                     </div>
                   </div>
 
-                  <div>
-                    <label
-                      class="mb-2 block font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-600"
-                    >
-                      Company / Organization
-                    </label>
+                  <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label
+                        class="mb-2 block font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-600"
+                      >
+                        Company / Organization
+                      </label>
 
-                    <input
-                      v-model="clientOrg"
-                      type="text"
-                      maxlength="120"
-                      autocomplete="organization"
-                      placeholder="Company name"
-                      class="w-full rounded-xl border border-white/[0.08] bg-[#0A0A0E] px-4 py-3 text-xs text-white outline-none transition focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/10"
-                    />
+                      <input
+                        v-model="clientOrg"
+                        type="text"
+                        maxlength="120"
+                        autocomplete="organization"
+                        placeholder="Company name"
+                        class="w-full rounded-xl border border-white/[0.08] bg-[#0A0A0E] px-4 py-3 text-xs text-white outline-none transition focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/10"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        class="mb-2 block font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-600"
+                      >
+                        Phone Number
+                      </label>
+
+                      <input
+                        v-model="clientPhone"
+                        type="tel"
+                        maxlength="30"
+                        autocomplete="tel"
+                        placeholder="+91 98765 43210"
+                        class="w-full rounded-xl border border-white/[0.08] bg-[#0A0A0E] px-4 py-3 text-xs text-white outline-none transition focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/10"
+                      />
+                    </div>
                   </div>
 
                   <div>
