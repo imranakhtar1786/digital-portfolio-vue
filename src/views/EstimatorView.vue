@@ -306,9 +306,8 @@ const handleSubmit = () => {
 
           <p class="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-zinc-500">
             Thanks,
-            <span class="font-semibold text-[#D4AF37]">
-              {{ clientName }} </span
-            >. Your estimated project scope has been prepared for review.
+            <span class="font-semibold text-[#D4AF37]"> {{ clientName }} </span>. Your estimated
+            project scope has been prepared for review.
           </p>
 
           <div class="mt-7 rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5">
