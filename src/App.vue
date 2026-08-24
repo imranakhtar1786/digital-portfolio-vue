@@ -14,6 +14,5 @@ useLenis()
     <CursorGlow />
     <RouterView />
   </div>
-
   <Analytics />
 </template>
