@@ -2,8 +2,11 @@
 import { defineAsyncComponent } from 'vue'
 import { RouterView } from 'vue-router'
 import { Analytics } from '@vercel/analytics/vue'
+import { useLenis } from '@/composables/useLenis'
 
 const CursorGlow = defineAsyncComponent(() => import('@/components/common/CursorGlow.vue'))
+
+useLenis()
 </script>
 
 <template>
@@ -11,5 +14,6 @@ const CursorGlow = defineAsyncComponent(() => import('@/components/common/Cursor
     <CursorGlow />
     <RouterView />
   </div>
+
   <Analytics />
 </template>
