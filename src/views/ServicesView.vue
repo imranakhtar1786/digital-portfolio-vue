@@ -63,14 +63,15 @@ const iconMap = {
           </div>
 
           <h1
-            class="mt-6 text-4xl font-black uppercase leading-[0.95] tracking-[-0.05em] sm:text-6xl lg:text-7xl"
+            class="mt-6 text-4xl font-black uppercase leading-[0.92] tracking-[-0.05em] sm:text-5xl lg:text-7xl"
           >
-            DIGITAL
+            BUILD
             <br />
 
-            <span class="text-zinc-500">SOLUTIONS THAT</span>
+            <span class="text-zinc-500">DIGITAL </span>
+            <br />
 
-            <span class="text-[#D4AF37]"> SCALE.</span>
+            <span class="text-[#D4AF37]">MOMENTUM.</span>
           </h1>
 
           <p class="mt-6 max-w-2xl text-sm leading-[1.8] text-zinc-500 sm:text-base">

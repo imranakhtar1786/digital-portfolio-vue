@@ -227,14 +227,20 @@ const stats = [
           </div>
 
           <h1
-            class="mt-7 text-5xl font-black uppercase leading-[0.9] tracking-[-0.065em] sm:text-6xl lg:text-8xl"
+            class="mt-7 max-w-5xl text-4xl font-bold leading-[0.95] tracking-[-0.045em] sm:text-5xl lg:text-7xl"
           >
-            Momentum Lab — Building digital
-            <br />
+            <span class="block text-zinc-400"> We are </span>
 
-            <span class="text-zinc-500"> products with </span>
+            <span class="mt-1 block text-white">
+              Momentum <span class="text-[#D4AF37]">Lab.</span>
+            </span>
 
-            <span class="text-[#D4AF37]"> purpose. </span>
+            <span class="mt-3 block text-zinc-500">
+              Building
+              <span class="text-white">digital experiences</span>
+              <br class="hidden sm:block" />
+              <span class="text-[#D4AF37]">that move forward.</span>
+            </span>
           </h1>
 
           <p class="mt-8 max-w-2xl text-sm leading-[1.8] text-zinc-500 sm:text-base">
