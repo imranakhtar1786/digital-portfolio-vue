@@ -212,11 +212,13 @@ router.afterEach((to) => {
   updateMetaTag('og:title', title, true)
   updateMetaTag('og:description', description, true)
   updateMetaTag('og:url', fullUrl, true)
+  updateMetaTag('og:image', 'https://www.momentumlab.in/icon.webp', true)
 
   // Update Twitter Cards
   updateMetaTag('twitter:title', title)
   updateMetaTag('twitter:description', description)
   updateMetaTag('twitter:url', fullUrl)
+  updateMetaTag('twitter:image', 'https://www.momentumlab.in/icon.webp')
 
   // Update Canonical Link
   updateCanonicalLink(fullUrl)

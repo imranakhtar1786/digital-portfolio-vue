@@ -162,8 +162,8 @@ onUnmounted(() => {
           <h1
             class="text-[clamp(3rem,6vw,6.7rem)] font-black uppercase leading-[0.88] tracking-[-0.065em] text-white"
           >
-            <span class="block">Your Idea</span>
-            <span class="block">Deserves More</span>
+            <!-- <span class="block">Momentum Lab</span> -->
+            <span class="block">Your Idea Deserves More</span>
             <span class="block text-[#D4AF37]">Than A Template.</span>
           </h1>
 

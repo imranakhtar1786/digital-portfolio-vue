@@ -53,7 +53,10 @@ import { Phone, MessageCircle } from 'lucide-vue-next'
           </RouterLink>
 
           <p class="mt-7 max-w-sm text-sm font-light leading-7 text-zinc-500">
-            We turn ideas into thoughtful digital experiences — from high-performance websites to
+            <RouterLink to="/" class="font-semibold text-zinc-300 hover:text-white"
+              >Momentum Lab</RouterLink
+            >
+            turns ideas into thoughtful digital experiences — from high-performance websites to
             custom software and scalable web applications.
           </p>
 

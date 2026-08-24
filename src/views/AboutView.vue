@@ -229,7 +229,7 @@ const stats = [
           <h1
             class="mt-7 text-5xl font-black uppercase leading-[0.9] tracking-[-0.065em] sm:text-6xl lg:text-8xl"
           >
-            Building digital
+            Momentum Lab — Building digital
             <br />
 
             <span class="text-zinc-500"> products with </span>
@@ -238,7 +238,10 @@ const stats = [
           </h1>
 
           <p class="mt-8 max-w-2xl text-sm leading-[1.8] text-zinc-500 sm:text-base">
-            Momentum Lab is an independent digital lab focused on building modern websites, scalable
+            <RouterLink to="/" class="font-semibold text-zinc-300 hover:text-white"
+              >Momentum Lab</RouterLink
+            >
+            is an independent digital lab focused on building modern websites, scalable
             applications, and high-performance digital solutions for businesses, startups, and
             ambitious individuals.
           </p>
