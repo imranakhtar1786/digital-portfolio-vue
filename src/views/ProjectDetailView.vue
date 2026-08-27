@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { Sparkles, ExternalLink, ArrowLeft, CheckCircle2, ShieldAlert, Cpu } from 'lucide-vue-next'
 import { Motion } from 'motion-v'
@@ -13,6 +13,59 @@ const route = useRoute()
 const project = computed(() => {
   return projects.find((p) => p.id === route.params.id) || projects[0]
 })
+
+function updateMetaTag(nameOrProperty, value, isProperty = false) {
+  const attribute = isProperty ? 'property' : 'name'
+  let element = document.querySelector(`meta[${attribute}="${nameOrProperty}"]`)
+  if (!element) {
+    element = document.createElement('meta')
+    element.setAttribute(attribute, nameOrProperty)
+    document.head.appendChild(element)
+  }
+  element.setAttribute('content', value)
+}
+
+function updateCanonicalLink(url) {
+  let link = document.querySelector('link[rel="canonical"]')
+  if (!link) {
+    link = document.createElement('link')
+    link.setAttribute('rel', 'canonical')
+    document.head.appendChild(link)
+  }
+  link.setAttribute('href', url)
+}
+
+function updateProjectSeo() {
+  const currentProject = project.value
+  const baseUrl = 'https://www.momentumlab.in'
+  const currentUrl = `${baseUrl}${route.fullPath}`
+  const title = `${currentProject.title} | Momentum Lab Portfolio`
+  const description = currentProject.description || currentProject.shortDesc
+  const keywords = `${currentProject.title}, ${currentProject.category}, ${currentProject.tech?.join(', ') || ''}, Momentum Lab project, portfolio case study`
+
+  document.title = title
+  updateMetaTag('title', title)
+  updateMetaTag('description', description)
+  updateMetaTag('keywords', keywords)
+  updateMetaTag('og:title', title, true)
+  updateMetaTag('og:description', description, true)
+  updateMetaTag('og:url', currentUrl, true)
+  updateMetaTag('twitter:title', title)
+  updateMetaTag('twitter:description', description)
+  updateMetaTag('twitter:url', currentUrl)
+  updateCanonicalLink(currentUrl)
+}
+
+onMounted(() => {
+  updateProjectSeo()
+})
+
+watch(
+  () => route.fullPath,
+  () => {
+    updateProjectSeo()
+  },
+)
 </script>
 
 <template>

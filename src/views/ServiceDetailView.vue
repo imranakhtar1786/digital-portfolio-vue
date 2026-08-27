@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import {
   Sparkles,
@@ -24,6 +24,60 @@ const route = useRoute()
 const service = computed(() => {
   return services.find((s) => s.id === route.params.id) || services[0]
 })
+
+function updateMetaTag(nameOrProperty, value, isProperty = false) {
+  const attribute = isProperty ? 'property' : 'name'
+  let element = document.querySelector(`meta[${attribute}="${nameOrProperty}"]`)
+  if (!element) {
+    element = document.createElement('meta')
+    element.setAttribute(attribute, nameOrProperty)
+    document.head.appendChild(element)
+  }
+  element.setAttribute('content', value)
+}
+
+function updateCanonicalLink(url) {
+  let link = document.querySelector('link[rel="canonical"]')
+  if (!link) {
+    link = document.createElement('link')
+    link.setAttribute('rel', 'canonical')
+    document.head.appendChild(link)
+  }
+  link.setAttribute('href', url)
+}
+
+function updateServiceSeo() {
+  const currentService = service.value
+  const baseUrl = 'https://www.momentumlab.in'
+  const currentUrl = `${baseUrl}${route.fullPath}`
+  const title = `${currentService.title} | Momentum Lab Services`
+  const description =
+    currentService.heroTagline || currentService.overview || currentService.shortDesc
+  const keywords = `${currentService.title}, ${currentService.techStack?.join(', ') || ''}, Momentum Lab services, web agency`
+
+  document.title = title
+  updateMetaTag('title', title)
+  updateMetaTag('description', description)
+  updateMetaTag('keywords', keywords)
+  updateMetaTag('og:title', title, true)
+  updateMetaTag('og:description', description, true)
+  updateMetaTag('og:url', currentUrl, true)
+  updateMetaTag('twitter:title', title)
+  updateMetaTag('twitter:description', description)
+  updateMetaTag('twitter:url', currentUrl)
+  updateCanonicalLink(currentUrl)
+}
+
+onMounted(() => {
+  updateServiceSeo()
+})
+
+watch(
+  () => route.fullPath,
+  () => {
+    updateServiceSeo()
+  },
+)
 </script>
 
 <template>
