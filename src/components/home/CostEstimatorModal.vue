@@ -19,6 +19,7 @@ import {
   Send,
 } from 'lucide-vue-next'
 
+import { pauseLenis, resumeLenis } from '@/composables/useLenis'
 import { formatCurrency } from '@/stores/currencyStore.js'
 
 const props = defineProps({
@@ -70,10 +71,10 @@ const clientNotes = ref('')
 const projectTypes = [
   {
     id: 'landing',
-    label: 'Landing Page',
+    label: 'Portfolio Website / Landing Page',
     short: 'Landing',
-    baseUsd: 79,
-    baseInr: 5999,
+    baseUsd: 52,
+    baseInr: 4999,
     desc: 'Modern website or portfolio. Standard scope includes up to 5–8 pages; extra pages and advanced features increase the final cost.',
     icon: Globe,
   },
@@ -81,7 +82,7 @@ const projectTypes = [
     id: 'web_app',
     label: 'Web App / E-commerce',
     short: 'Web App',
-    baseUsd: 149,
+    baseUsd: 126,
     baseInr: 11999,
     desc: 'Custom full-stack web application. Final cost depends on features, pages, user roles, APIs, payments, and complexity.',
     icon: ShoppingCart,
@@ -90,7 +91,7 @@ const projectTypes = [
     id: 'mobile_app',
     label: 'Mobile Application',
     short: 'Mobile',
-    baseUsd: 199,
+    baseUsd: 157,
     baseInr: 14999,
     desc: 'Android & iOS app. Final cost depends on screens, features, APIs, and complexity.',
     icon: Smartphone,
@@ -99,7 +100,7 @@ const projectTypes = [
     id: 'devops',
     label: 'Cloud / Server',
     short: 'Cloud',
-    baseUsd: 89,
+    baseUsd: 73,
     baseInr: 6999,
     desc: 'VPS setup, deployment, migration, and server configuration. Final cost depends on infrastructure and migration complexity.',
     icon: Server,
@@ -207,6 +208,7 @@ const calculatedInr = computed(() => {
 const turnstileToken = ref('')
 const turnstileReady = ref(false)
 const turnstileContainer = ref(null)
+const estimatorScrollRef = ref(null)
 
 let turnstileWidgetId = null
 
@@ -639,13 +641,53 @@ const handleEscape = (event) => {
   }
 }
 
+const attachEstimatorWheelListener = () => {
+  const element = estimatorScrollRef.value
+
+  if (!element) return
+
+  if (element.dataset.estimatorWheelBound === 'true') {
+    return
+  }
+
+  element.dataset.estimatorWheelBound = 'true'
+  element.addEventListener('wheel', handleEstimatorWheel, { passive: false })
+}
+
+const detachEstimatorWheelListener = () => {
+  const element = estimatorScrollRef.value
+
+  if (!element) return
+
+  element.removeEventListener('wheel', handleEstimatorWheel)
+  delete element.dataset.estimatorWheelBound
+}
+
+const handleEstimatorWheel = (event) => {
+  const element = estimatorScrollRef.value
+
+  if (!element) {
+    return
+  }
+
+  const maxScrollTop = element.scrollHeight - element.clientHeight
+  const delta = event.deltaY || event.wheelDelta || -event.deltaX
+
+  if ((delta > 0 && element.scrollTop < maxScrollTop) || (delta < 0 && element.scrollTop > 0)) {
+    event.preventDefault()
+    element.scrollTop += delta * 0.9
+  }
+}
+
 watch(
   () => props.isOpen,
   async (open) => {
-    document.body.style.overflow = open ? 'hidden' : ''
-
     if (open) {
+      pauseLenis()
+      document.body.style.overflow = 'hidden'
+
       await nextTick()
+      attachEstimatorWheelListener()
 
       if (turnstileReady.value && turnstileContainer.value) {
         await renderTurnstile(turnstileContainer.value)
@@ -653,6 +695,9 @@ watch(
         await initializeTurnstile()
       }
     } else {
+      detachEstimatorWheelListener()
+      document.body.style.overflow = ''
+      resumeLenis()
       resetTurnstile()
     }
   },
@@ -690,6 +735,7 @@ onBeforeUnmount(() => {
   document.body.style.overflow = ''
 
   window.removeEventListener('keydown', handleEscape)
+  detachEstimatorWheelListener()
 
   try {
     if (window.turnstile && turnstileWidgetId !== null && turnstileWidgetId !== undefined) {
@@ -804,9 +850,8 @@ onBeforeUnmount(() => {
 
             <p class="mt-4 text-sm leading-relaxed text-zinc-500">
               Thanks
-              <span class="font-medium text-zinc-200">
-                {{ clientName || 'there' }} </span
-              >. We'll review your requirements and contact you at
+              <span class="font-medium text-zinc-200"> {{ clientName || 'there' }} </span>. We'll
+              review your requirements and contact you at
               <span class="text-zinc-300">
                 {{ clientEmail }}
               </span>
@@ -839,8 +884,10 @@ onBeforeUnmount(() => {
           <!-- LEFT -->
 
           <div
+            ref="estimatorScrollRef"
             data-estimator-scroll
-            class="min-h-0 overflow-y-auto overscroll-contain scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10"
+            class="min-h-0 h-full overflow-y-auto overscroll-contain touch-pan-y scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10"
+            style="overscroll-behavior: contain; touch-action: pan-y"
           >
             <div class="p-4 sm:p-6 lg:p-7">
               <!-- STEP HEADER -->

@@ -8,7 +8,7 @@ export const services = [
 
     iconName: 'Code',
 
-    startingUsd: 125,
+    startingUsd: 126,
     startingInr: 11999,
 
     heroTagline:
@@ -82,7 +82,7 @@ export const services = [
 
     iconName: 'TrendingUp',
 
-    startingUsd: 69,
+    startingUsd: 52,
     startingInr: 4999,
 
     heroTagline:
@@ -134,15 +134,15 @@ export const services = [
 
   {
     id: 'ui-ux-design',
-    title: 'Landing Page & UI Development',
+    title: 'Portfolio Website / Landing Page',
 
     shortDesc:
       'Modern landing pages, responsive interfaces and animated digital experiences built for conversion.',
 
     iconName: 'Palette',
 
-    startingUsd: 79,
-    startingInr: 5999,
+    startingUsd: 52,
+    startingInr: 4999,
 
     heroTagline:
       'High-impact landing pages and modern interfaces designed to communicate clearly and perform across devices.',
@@ -202,7 +202,7 @@ export const services = [
 
     iconName: 'Megaphone',
 
-    startingUsd: 79,
+    startingUsd: 63,
     startingInr: 5999,
 
     heroTagline:
@@ -261,7 +261,7 @@ export const services = [
 
     iconName: 'Server',
 
-    startingUsd: 89,
+    startingUsd: 73,
     startingInr: 6999,
 
     heroTagline:
@@ -325,7 +325,7 @@ export const services = [
 
     iconName: 'Smartphone',
 
-    startingUsd: 199,
+    startingUsd: 157,
     startingInr: 14999,
 
     heroTagline:

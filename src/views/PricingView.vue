@@ -23,10 +23,10 @@ const setCurrency = (currency) => {
 
 const packages = [
   {
-    name: 'Starter Website',
+    name: 'Portfolio Website / Landing Page',
     tagline:
       'A modern responsive website or landing page for individuals, startups, and small businesses.',
-    usd: 69,
+    usd: 52,
     inr: 4999,
     features: [
       'Responsive Mobile-First Design',
@@ -42,8 +42,8 @@ const packages = [
     name: 'Full-Stack Web Application',
     tagline:
       'A custom web application with frontend, backend, database, authentication, and deployment.',
-    usd: 199,
-    inr: 14999,
+    usd: 126,
+    inr: 11999,
     featured: true,
     badge: 'POPULAR',
     features: [
@@ -60,7 +60,7 @@ const packages = [
     name: 'Custom Platform',
     tagline:
       'For e-commerce platforms, business portals, advanced applications, and custom requirements.',
-    usd: 399,
+    usd: 314,
     inr: 29999,
     features: [
       'Custom Feature Development',

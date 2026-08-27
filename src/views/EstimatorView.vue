@@ -1,65 +1,89 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import {
-  Calculator,
+  X,
   Check,
-  IndianRupee,
-  DollarSign,
+  Calculator,
+  ArrowRight,
+  ArrowLeft,
+  ShieldCheck,
+  Sparkles,
+  Zap,
+  Globe,
+  Smartphone,
+  Server,
+  ShoppingCart,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
   Send,
-  Building2,
-  User,
-  Mail,
-  Phone,
-  FileText,
 } from 'lucide-vue-next'
 import { Motion } from 'motion-v'
 
-import { currentCurrency, formatCurrency } from '@/stores/currencyStore.js'
-
+import { formatCurrency } from '@/stores/currencyStore.js'
 import Header from '@/components/layout/Header.vue'
 import Footer from '@/components/layout/Footer.vue'
 
-const selectedCategory = ref('landing')
+const API_URL = '/api/contact'
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY
+
+const currentStep = ref(1)
+const isSubmitted = ref(false)
+const isSubmitting = ref(false)
+const errorMessage = ref('')
+
+const fieldErrors = ref({
+  name: '',
+  email: '',
+  phone: '',
+})
+
+const selectedType = ref('landing')
 const selectedTimeline = ref('standard')
 const selectedAddons = ref(['seo'])
 
-const isSubmitted = ref(false)
-const submitError = ref('')
-
 const clientName = ref('')
-const clientCompany = ref('')
 const clientEmail = ref('')
 const clientPhone = ref('')
+const clientOrg = ref('')
 const clientNotes = ref('')
 
 const projectTypes = [
   {
     id: 'landing',
-    label: 'Landing Page / Portfolio',
-    baseUsd: 79,
-    baseInr: 5999,
-    desc: 'Responsive landing page or portfolio with modern UI and contact integration.',
+    label: 'Portfolio Website / Landing Page',
+    short: 'Landing',
+    baseUsd: 52,
+    baseInr: 4999,
+    desc: 'Modern website or portfolio. Standard scope includes up to 5–8 pages; extra pages and advanced features increase the final cost.',
+    icon: Globe,
   },
   {
     id: 'web_app',
-    label: 'Full-Stack Web App',
-    baseUsd: 149,
+    label: 'Web App / E-commerce',
+    short: 'Web App',
+    baseUsd: 126,
     baseInr: 11999,
-    desc: 'Custom web application, dashboard, API, database, or e-commerce solution.',
+    desc: 'Custom full-stack web application. Final cost depends on features, pages, user roles, APIs, payments, and complexity.',
+    icon: ShoppingCart,
   },
   {
     id: 'mobile_app',
     label: 'Mobile Application',
-    baseUsd: 199,
+    short: 'Mobile',
+    baseUsd: 157,
     baseInr: 14999,
-    desc: 'Cross-platform Android and iOS application with backend integration.',
+    desc: 'Android & iOS app. Final cost depends on screens, features, APIs, and complexity.',
+    icon: Smartphone,
   },
   {
     id: 'devops',
-    label: 'Cloud & Server Setup',
-    baseUsd: 89,
+    label: 'Cloud / Server',
+    short: 'Cloud',
+    baseUsd: 73,
     baseInr: 6999,
-    desc: 'VPS setup, deployment, SSL, Nginx configuration, and migration support.',
+    desc: 'VPS setup, deployment, migration, and server configuration. Final cost depends on infrastructure and migration complexity.',
+    icon: Server,
   },
 ]
 
@@ -67,19 +91,19 @@ const timelines = [
   {
     id: 'standard',
     label: 'Standard',
-    subLabel: '2–3 Weeks',
+    description: '2–3 weeks',
     mult: 1,
   },
   {
     id: 'fast',
-    label: 'Accelerated',
-    subLabel: 'Around 7 Days',
+    label: 'Priority',
+    description: '7 days',
     mult: 1.2,
   },
   {
     id: 'urgent',
     label: 'Express',
-    subLabel: 'Priority Delivery',
+    description: '48 hours',
     mult: 1.35,
   },
 ]
@@ -87,45 +111,41 @@ const timelines = [
 const addons = [
   {
     id: 'seo',
-    label: 'Technical SEO & Performance Optimization',
+    label: 'Technical SEO',
     usd: 49,
     inr: 3499,
   },
   {
     id: 'pwa',
-    label: 'PWA, Offline Support & Push Notifications',
+    label: 'PWA & Push Notifications',
     usd: 69,
     inr: 4999,
   },
   {
-    id: 'cms',
-    label: 'Custom Admin Panel / CMS',
+    id: 'admin',
+    label: 'Custom Admin Panel',
     usd: 79,
     inr: 5999,
   },
 ]
 
 const selectedProject = computed(() => {
-  return projectTypes.find((project) => project.id === selectedCategory.value) || projectTypes[0]
+  return projectTypes.find((item) => item.id === selectedType.value) || projectTypes[0]
 })
 
-const selectedTimelineData = computed(() => {
-  return timelines.find((timeline) => timeline.id === selectedTimeline.value) || timelines[0]
+const selectedDelivery = computed(() => {
+  return timelines.find((item) => item.id === selectedTimeline.value) || timelines[0]
 })
 
-const toggleAddon = (id) => {
-  if (selectedAddons.value.includes(id)) {
-    selectedAddons.value = selectedAddons.value.filter((addonId) => addonId !== id)
-  } else {
-    selectedAddons.value.push(id)
-  }
-}
+const selectedAddonDetails = computed(() => {
+  return addons.filter((item) => selectedAddons.value.includes(item.id))
+})
 
 const calculatedUsd = computed(() => {
-  let total = selectedProject.value.baseUsd * selectedTimelineData.value.mult
+  let total = selectedProject.value.baseUsd * selectedDelivery.value.mult
 
-  selectedAddons.value.forEach((addonId) => {
-    const addon = addons.find((item) => item.id === addonId)
+  selectedAddons.value.forEach((id) => {
+    const addon = addons.find((item) => item.id === id)
 
     if (addon) {
       total += addon.usd
@@ -136,10 +156,10 @@ const calculatedUsd = computed(() => {
 })
 
 const calculatedInr = computed(() => {
-  let total = selectedProject.value.baseInr * selectedTimelineData.value.mult
+  let total = selectedProject.value.baseInr * selectedDelivery.value.mult
 
-  selectedAddons.value.forEach((addonId) => {
-    const addon = addons.find((item) => item.id === addonId)
+  selectedAddons.value.forEach((id) => {
+    const addon = addons.find((item) => item.id === id)
 
     if (addon) {
       total += addon.inr
@@ -149,89 +169,397 @@ const calculatedInr = computed(() => {
   return Math.round(total)
 })
 
-const setCurrency = (currency) => {
-  currentCurrency.value = currency
+const turnstileToken = ref('')
+const turnstileReady = ref(false)
+const turnstileContainer = ref(null)
+const estimatorScrollRef = ref(null)
+let turnstileWidgetId = null
+
+const loadTurnstileScript = () => {
+  return new Promise((resolve, reject) => {
+    if (window.turnstile) {
+      turnstileReady.value = true
+      resolve()
+      return
+    }
+
+    const existingScript = document.querySelector(
+      'script[src*="challenges.cloudflare.com/turnstile/v0/api.js"]',
+    )
+
+    if (existingScript) {
+      const checkReady = setInterval(() => {
+        if (window.turnstile) {
+          clearInterval(checkReady)
+          turnstileReady.value = true
+          resolve()
+        }
+      }, 100)
+
+      setTimeout(() => {
+        clearInterval(checkReady)
+        if (!window.turnstile) {
+          reject(new Error('Cloudflare Turnstile failed to load.'))
+        }
+      }, 10000)
+
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
+    script.async = true
+    script.defer = true
+
+    script.onload = () => {
+      turnstileReady.value = true
+      resolve()
+    }
+
+    script.onerror = () => {
+      reject(new Error('Unable to load Cloudflare Turnstile.'))
+    }
+
+    document.head.appendChild(script)
+  })
 }
 
-const resetCalculator = () => {
+const renderTurnstile = async (container) => {
+  if (!container || !window.turnstile) return
+
+  if (!TURNSTILE_SITE_KEY) {
+    console.error('VITE_TURNSTILE_SITE_KEY is missing.')
+    errorMessage.value = 'Security verification is not configured correctly.'
+    return
+  }
+
+  try {
+    container.innerHTML = ''
+
+    turnstileWidgetId = window.turnstile.render(container, {
+      sitekey: TURNSTILE_SITE_KEY,
+      theme: 'dark',
+      size: 'flexible',
+      callback: (token) => {
+        turnstileToken.value = token
+        errorMessage.value = ''
+      },
+      'expired-callback': () => {
+        turnstileToken.value = ''
+        errorMessage.value = 'Security verification expired. Please verify again.'
+      },
+      'timeout-callback': () => {
+        turnstileToken.value = ''
+        errorMessage.value = 'Security verification timed out. Please try again.'
+      },
+      'error-callback': () => {
+        turnstileToken.value = ''
+        errorMessage.value = 'Security verification failed. Please try again.'
+      },
+    })
+  } catch (error) {
+    console.error('Turnstile render error:', error)
+    errorMessage.value = 'Security verification could not be loaded.'
+  }
+}
+
+const resetTurnstile = () => {
+  try {
+    if (!window.turnstile) return
+    if (turnstileWidgetId !== null && turnstileWidgetId !== undefined) {
+      window.turnstile.reset(turnstileWidgetId)
+    }
+    turnstileToken.value = ''
+  } catch (error) {
+    console.error('Turnstile reset error:', error)
+  }
+}
+
+const initializeTurnstile = async () => {
+  try {
+    await loadTurnstileScript()
+    await nextTick()
+
+    if (turnstileContainer.value) {
+      await renderTurnstile(turnstileContainer.value)
+    }
+  } catch (error) {
+    console.error(error)
+    errorMessage.value = 'Security verification could not be loaded. Please refresh and try again.'
+  }
+}
+
+const parseResponse = async (response) => {
+  const text = await response.text()
+
+  if (!text) {
+    return {
+      success: false,
+      message: `Server returned ${response.status} ${response.statusText}`,
+    }
+  }
+
+  try {
+    return JSON.parse(text)
+  } catch {
+    return {
+      success: false,
+      message: 'The server returned an invalid response.',
+      raw: text,
+    }
+  }
+}
+
+const validateEmail = (email) => {
+  const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
+  return pattern.test(email)
+}
+
+const validatePhone = (phone) => {
+  const digits = phone.replace(/\D/g, '')
+  return digits.length >= 10 && digits.length <= 15
+}
+
+const clearFieldError = (field) => {
+  fieldErrors.value[field] = ''
+  errorMessage.value = ''
+}
+
+const validateStepThree = () => {
+  fieldErrors.value = {
+    name: '',
+    email: '',
+    phone: '',
+  }
+
+  let valid = true
+  const name = clientName.value.trim()
+  const email = clientEmail.value.trim()
+  const phone = clientPhone.value.trim()
+
+  if (!name) {
+    fieldErrors.value.name = 'Please enter your name.'
+    valid = false
+  } else if (name.length < 2) {
+    fieldErrors.value.name = 'Name must contain at least 2 characters.'
+    valid = false
+  }
+
+  if (!email) {
+    fieldErrors.value.email = 'Please enter your email.'
+    valid = false
+  } else if (!validateEmail(email)) {
+    fieldErrors.value.email = 'Please enter a valid email address.'
+    valid = false
+  }
+
+  if (!phone) {
+    fieldErrors.value.phone = 'Please enter your phone number.'
+    valid = false
+  } else if (!validatePhone(phone)) {
+    fieldErrors.value.phone = 'Please enter a valid phone number with 10–15 digits.'
+    valid = false
+  }
+
+  return valid
+}
+
+const toggleAddon = (id) => {
+  if (selectedAddons.value.includes(id)) {
+    selectedAddons.value = selectedAddons.value.filter((item) => item !== id)
+  } else {
+    selectedAddons.value.push(id)
+  }
+}
+
+const nextStep = () => {
+  if (currentStep.value < 3) {
+    currentStep.value++
+  }
+}
+
+const previousStep = () => {
+  if (currentStep.value > 1) {
+    currentStep.value--
+  }
+}
+
+const handleSubmit = async () => {
+  if (isSubmitting.value) return
+
+  errorMessage.value = ''
+
+  const isValid = validateStepThree()
+
+  if (!isValid) {
+    errorMessage.value = 'Please correct the highlighted fields.'
+    return
+  }
+
+  if (!turnstileToken.value) {
+    errorMessage.value = 'Please complete the security verification.'
+    return
+  }
+
+  isSubmitting.value = true
+
+  try {
+    const payload = {
+      name: clientName.value.trim(),
+      email: clientEmail.value.trim(),
+      phone: clientPhone.value.trim(),
+      company: clientOrg.value.trim(),
+      message: clientNotes.value.trim(),
+      projectType: selectedProject.value.id,
+      projectLabel: selectedProject.value.label,
+      timeline: selectedDelivery.value.id,
+      timelineLabel: selectedDelivery.value.label,
+      addons: selectedAddonDetails.value.map((addon) => addon.id),
+      addonLabels: selectedAddonDetails.value.map((addon) => addon.label),
+      estimateUsd: calculatedUsd.value,
+      estimatedUsd: calculatedUsd.value,
+      estimateInr: calculatedInr.value,
+      estimatedInr: calculatedInr.value,
+      isEstimator: true,
+      turnstileToken: turnstileToken.value,
+    }
+
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+
+    const result = await parseResponse(response)
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || `Request failed with status ${response.status}`)
+    }
+
+    isSubmitted.value = true
+    resetTurnstile()
+  } catch (error) {
+    console.error('Estimate submission error:', error)
+    errorMessage.value = error?.message || 'Something went wrong. Please try again later.'
+    resetTurnstile()
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+const resetEstimator = () => {
+  currentStep.value = 1
   isSubmitted.value = false
-  submitError.value = ''
+  isSubmitting.value = false
+  errorMessage.value = ''
 
-  clientName.value = ''
-  clientCompany.value = ''
-  clientEmail.value = ''
-  clientPhone.value = ''
-  clientNotes.value = ''
+  fieldErrors.value = {
+    name: '',
+    email: '',
+    phone: '',
+  }
 
-  selectedCategory.value = 'landing'
+  selectedType.value = 'landing'
   selectedTimeline.value = 'standard'
   selectedAddons.value = ['seo']
+  clientName.value = ''
+  clientEmail.value = ''
+  clientPhone.value = ''
+  clientOrg.value = ''
+  clientNotes.value = ''
+  turnstileToken.value = ''
 }
 
-const handleSubmit = () => {
-  submitError.value = ''
-
-  if (!clientName.value.trim()) {
-    submitError.value = 'Please enter your name.'
-    return
-  }
-
-  if (!clientEmail.value.trim()) {
-    submitError.value = 'Please enter your email address.'
-    return
-  }
-
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-  if (!emailPattern.test(clientEmail.value)) {
-    submitError.value = 'Please enter a valid email address.'
-    return
-  }
-
-  const estimateData = {
-    name: clientName.value,
-    company: clientCompany.value,
-    email: clientEmail.value,
-    phone: clientPhone.value,
-    requirements: clientNotes.value,
-    projectType: selectedProject.value.label,
-    timeline: selectedTimelineData.value.label,
-    addons: selectedAddons.value,
-    estimatedUsd: calculatedUsd.value,
-    estimatedInr: calculatedInr.value,
-  }
-
-  console.log('Project Estimate:', estimateData)
-
-  isSubmitted.value = true
+const closeModal = () => {
+  resetTurnstile()
+  resetEstimator()
 }
+
+watch(
+  () => currentStep.value,
+  () => {
+    requestAnimationFrame(() => {
+      const element = document.querySelector('[data-estimator-scroll]')
+      if (element) {
+        element.scrollTop = 0
+      }
+    })
+  },
+)
+
+const attachEstimatorWheelListener = () => {
+  const element = estimatorScrollRef.value
+  if (!element) return
+  if (element.dataset.estimatorWheelBound === 'true') return
+
+  element.dataset.estimatorWheelBound = 'true'
+  element.addEventListener('wheel', handleEstimatorWheel, { passive: false })
+}
+
+const detachEstimatorWheelListener = () => {
+  const element = estimatorScrollRef.value
+  if (!element) return
+
+  element.removeEventListener('wheel', handleEstimatorWheel)
+  delete element.dataset.estimatorWheelBound
+}
+
+const handleEstimatorWheel = (event) => {
+  const element = estimatorScrollRef.value
+  if (!element) return
+
+  const maxScrollTop = element.scrollHeight - element.clientHeight
+  const delta = event.deltaY || event.wheelDelta || -event.deltaX
+
+  if ((delta > 0 && element.scrollTop < maxScrollTop) || (delta < 0 && element.scrollTop > 0)) {
+    event.preventDefault()
+    element.scrollTop += delta * 0.9
+  }
+}
+
+onMounted(async () => {
+  await initializeTurnstile()
+  attachEstimatorWheelListener()
+})
+
+onBeforeUnmount(() => {
+  detachEstimatorWheelListener()
+  try {
+    if (window.turnstile && turnstileWidgetId !== null && turnstileWidgetId !== undefined) {
+      window.turnstile.remove(turnstileWidgetId)
+    }
+  } catch (error) {
+    console.error('Turnstile cleanup error:', error)
+  }
+})
 </script>
 
 <template>
   <div class="relative min-h-screen overflow-hidden bg-[#030303] text-white">
     <Header />
 
-    <main class="relative pt-28 pb-24 sm:pt-32">
-      <!-- Background Glow -->
+    <main class="relative pb-24 pt-28 sm:pt-32">
       <div
         class="pointer-events-none absolute left-1/2 top-0 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-[#D4AF37]/[0.035] blur-[150px]"
       ></div>
 
       <div class="relative mx-auto w-[90%] max-w-6xl">
-        <!-- ================= HEADER ================= -->
-
         <Motion
           :initial="{ opacity: 0, y: 30 }"
           :animate="{ opacity: 1, y: 0 }"
-          :transition="{ duration: 0.7 }"
+          :transition="{ duration: 0.7, ease: 'easeOut' }"
           class="mx-auto max-w-3xl text-center"
         >
           <div
-            class="inline-flex items-center gap-2 rounded-full border border-[#D4AF37]/20 bg-[#D4AF37]/[0.04] px-4 py-2"
+            class="inline-flex items-center gap-2 rounded-full border border-[#D4AF37]/20 bg-[#D4AF37]/[0.04] px-4 py-2 shadow-[0_0_30px_rgba(212,175,55,0.06)]"
           >
             <Calculator :size="14" class="text-[#D4AF37]" />
-
-            <span class="text-[9px] font-bold uppercase tracking-[0.2em] text-[#D4AF37]">
+            <span
+              class="text-[10px] font-bold uppercase tracking-[0.22em] text-[#D4AF37] sm:text-[11px]"
+            >
               Instant Project Estimator
             </span>
           </div>
@@ -241,51 +569,15 @@ const handleSubmit = () => {
           >
             BUILD YOUR
             <br />
-
-            <span class="text-zinc-500"> PROJECT </span>
-
-            <span class="text-[#D4AF37]"> ESTIMATE. </span>
+            <span class="text-zinc-500">PROJECT</span>
+            <span class="text-[#D4AF37]"> ESTIMATE.</span>
           </h1>
 
-          <p class="mx-auto mt-6 max-w-2xl text-sm leading-[1.8] text-zinc-500 sm:text-base">
+          <p class="mx-auto mt-6 max-w-2xl text-sm leading-[1.8] text-zinc-400 sm:text-[15px]">
             Configure your project requirements, timeline, and additional services to get an
             estimated starting cost.
           </p>
-
-          <!-- Currency Selector -->
-
-          <div class="mt-8 inline-flex rounded-2xl border border-white/[0.08] bg-[#08080C] p-1.5">
-            <button
-              @click="setCurrency('INR')"
-              class="flex items-center gap-2 rounded-xl px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider transition-all"
-              :class="
-                currentCurrency === 'INR'
-                  ? 'bg-[#D4AF37] text-black shadow-[0_0_20px_rgba(212,175,55,0.15)]'
-                  : 'text-zinc-500 hover:text-white'
-              "
-            >
-              <IndianRupee :size="13" />
-
-              INR
-            </button>
-
-            <button
-              @click="setCurrency('USD')"
-              class="flex items-center gap-2 rounded-xl px-5 py-2.5 text-[10px] font-bold uppercase tracking-wider transition-all"
-              :class="
-                currentCurrency === 'USD'
-                  ? 'bg-[#D4AF37] text-black shadow-[0_0_20px_rgba(212,175,55,0.15)]'
-                  : 'text-zinc-500 hover:text-white'
-              "
-            >
-              <DollarSign :size="13" />
-
-              USD
-            </button>
-          </div>
         </Motion>
-
-        <!-- ================= SUCCESS ================= -->
 
         <Motion
           v-if="isSubmitted"
@@ -295,465 +587,625 @@ const handleSubmit = () => {
           class="mx-auto mt-16 max-w-2xl overflow-hidden rounded-[2rem] border border-[#D4AF37]/30 bg-[#08080C] p-8 text-center sm:p-12"
         >
           <div
-            class="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl border border-[#D4AF37]/30 bg-[#D4AF37]/[0.06] text-[#D4AF37]"
+            class="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/[0.07] shadow-[0_0_60px_rgba(212,175,55,0.12)]"
           >
-            <Check :size="38" />
+            <CheckCircle2 :size="38" class="text-[#D4AF37]" />
           </div>
 
-          <h2 class="mt-7 text-2xl font-black uppercase tracking-[-0.03em] text-white">
-            Estimate Ready
-          </h2>
-
-          <p class="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-zinc-500">
-            Thanks,
-            <span class="font-semibold text-[#D4AF37]"> {{ clientName }} </span>. Your estimated
-            project scope has been prepared for review.
+          <p
+            class="mt-6 font-mono text-[10px] uppercase tracking-[0.3em] text-[#D4AF37] sm:text-[11px]"
+          >
+            Estimate Submitted
           </p>
 
-          <div class="mt-7 rounded-2xl border border-white/[0.07] bg-white/[0.02] p-5">
-            <span class="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-600">
-              Estimated Starting Cost
-            </span>
+          <h3 class="mt-3 text-3xl font-black uppercase tracking-[-0.05em] sm:text-4xl">
+            You're all set<span class="text-[#D4AF37]">.</span>
+          </h3>
 
-            <p class="mt-3 text-3xl font-black text-[#D4AF37] sm:text-4xl">
-              {{ formatCurrency(calculatedUsd, calculatedInr) }}
+          <p class="mt-4 text-sm leading-relaxed text-zinc-400 sm:text-[15px]">
+            Thanks
+            <span class="font-medium text-zinc-200"> {{ clientName || 'there' }} </span>. We'll
+            review your requirements and contact you at
+            <span class="text-zinc-300"> {{ clientEmail }} </span>
+            shortly.
+          </p>
+
+          <div
+            class="mx-auto mt-7 flex max-w-sm items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-left"
+          >
+            <ShieldCheck :size="18" class="shrink-0 text-[#D4AF37]" />
+            <p class="text-[12px] leading-relaxed text-zinc-400">
+              Your project details remain private and are only used to prepare your estimate.
             </p>
           </div>
 
           <button
-            @click="resetCalculator"
-            class="mt-8 rounded-xl bg-[#D4AF37] px-7 py-3.5 text-[10px] font-black uppercase tracking-[0.12em] text-black transition hover:scale-[1.03]"
+            type="button"
+            class="mt-7 rounded-xl bg-[#D4AF37] px-7 py-3 text-[10px] font-black uppercase tracking-widest text-black transition-all hover:bg-[#E4C55A] hover:shadow-[0_10px_30px_rgba(212,175,55,0.15)] sm:text-[11px]"
+            @click="closeModal"
           >
-            Create Another Estimate
+            Close Estimator
           </button>
         </Motion>
 
-        <!-- ================= CALCULATOR ================= -->
-
-        <div v-else class="mt-16 grid gap-8 lg:grid-cols-[1.55fr_0.85fr]">
-          <!-- LEFT SIDE -->
-
-          <div class="space-y-6">
-            <!-- 01 PROJECT TYPE -->
-
-            <Motion
-              :initial="{ opacity: 0, y: 35 }"
-              :while-in-view="{ opacity: 1, y: 0 }"
-              :viewport="{ once: true, amount: 0.15 }"
-              :transition="{ duration: 0.6 }"
-              class="rounded-[1.75rem] border border-white/[0.08] bg-[#08080C] p-6 sm:p-8"
-            >
-              <div class="flex items-center gap-3">
-                <div
-                  class="flex h-9 w-9 items-center justify-center rounded-xl border border-[#D4AF37]/20 bg-[#D4AF37]/[0.04] text-[#D4AF37]"
-                >
-                  <span class="text-xs font-black"> 01 </span>
+        <Motion
+          v-else
+          :initial="{ opacity: 0, y: 32 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.6, ease: 'easeOut' }"
+          class="mt-16 grid min-h-0 gap-8 lg:grid-cols-[minmax(0,1fr)_280px]"
+        >
+          <div
+            ref="estimatorScrollRef"
+            data-estimator-scroll
+            class="min-h-0 h-full overflow-y-auto overscroll-contain touch-pan-y scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10"
+            style="overscroll-behavior: contain; touch-action: pan-y"
+          >
+            <div class="p-4 sm:p-6 lg:p-7">
+              <div class="mb-5 flex items-center justify-between border-b border-white/[0.06] pb-4">
+                <div>
+                  <span
+                    class="font-mono text-[10px] uppercase tracking-[0.25em] text-[#D4AF37] sm:text-[11px]"
+                  >
+                    Configuration
+                  </span>
+                  <p class="mt-1 text-sm text-zinc-500">Step {{ currentStep }} of 3</p>
                 </div>
 
-                <div>
-                  <h3 class="text-sm font-black uppercase tracking-[0.08em]">
-                    Select Project Type
-                  </h3>
-
-                  <p class="mt-1 text-[11px] text-zinc-600">
-                    Choose the closest match for your project.
-                  </p>
+                <div class="flex items-center gap-1.5">
+                  <span
+                    v-for="step in 3"
+                    :key="step"
+                    class="h-1.5 rounded-full transition-all duration-300"
+                    :class="step <= currentStep ? 'w-8 bg-[#D4AF37]' : 'w-4 bg-white/10'"
+                  ></span>
                 </div>
               </div>
 
-              <div class="mt-7 grid gap-3 sm:grid-cols-2">
-                <button
-                  v-for="type in projectTypes"
-                  :key="type.id"
-                  @click="selectedCategory = type.id"
-                  class="group rounded-2xl border p-4 text-left transition-all duration-300"
-                  :class="
-                    selectedCategory === type.id
-                      ? 'border-[#D4AF37]/60 bg-[#D4AF37]/[0.05]'
-                      : 'border-white/[0.08] bg-white/[0.015] hover:border-white/[0.18]'
-                  "
-                >
-                  <div class="flex items-start justify-between gap-4">
-                    <span
-                      class="text-xs font-bold"
-                      :class="selectedCategory === type.id ? 'text-[#FCF6BA]' : 'text-zinc-200'"
-                    >
-                      {{ type.label }}
-                    </span>
-
-                    <span class="shrink-0 font-mono text-[10px] font-bold text-[#D4AF37]">
-                      {{ formatCurrency(type.baseUsd, type.baseInr) }}
-                    </span>
+              <Transition
+                mode="out-in"
+                enter-active-class="transition-all duration-250"
+                enter-from-class="opacity-0 translate-x-3"
+                enter-to-class="opacity-100 translate-x-0"
+                leave-active-class="transition-all duration-200"
+                leave-from-class="opacity-100 translate-x-0"
+                leave-to-class="opacity-0 -translate-x-3"
+              >
+                <div v-if="currentStep === 1" key="step-one" class="space-y-4">
+                  <div>
+                    <h3 class="text-lg font-black uppercase tracking-[-0.03em] sm:text-xl">
+                      What are you building<span class="text-[#D4AF37]">?</span>
+                    </h3>
+                    <p class="mt-1 text-sm text-zinc-500">Choose the closest starting point.</p>
                   </div>
 
-                  <p class="mt-2 text-[10px] leading-relaxed text-zinc-600">
-                    {{ type.desc }}
-                  </p>
-                </button>
-              </div>
-            </Motion>
-
-            <!-- 02 TIMELINE -->
-
-            <Motion
-              :initial="{ opacity: 0, y: 35 }"
-              :while-in-view="{ opacity: 1, y: 0 }"
-              :viewport="{ once: true, amount: 0.15 }"
-              :transition="{ duration: 0.6, delay: 0.05 }"
-              class="rounded-[1.75rem] border border-white/[0.08] bg-[#08080C] p-6 sm:p-8"
-            >
-              <div class="flex items-center gap-3">
-                <div
-                  class="flex h-9 w-9 items-center justify-center rounded-xl border border-[#D4AF37]/20 bg-[#D4AF37]/[0.04] text-[#D4AF37]"
-                >
-                  <span class="text-xs font-black"> 02 </span>
-                </div>
-
-                <div>
-                  <h3 class="text-sm font-black uppercase tracking-[0.08em]">Target Timeline</h3>
-
-                  <p class="mt-1 text-[11px] text-zinc-600">
-                    Faster delivery may affect the estimate.
-                  </p>
-                </div>
-              </div>
-
-              <div class="mt-7 grid gap-3 sm:grid-cols-3">
-                <button
-                  v-for="timeline in timelines"
-                  :key="timeline.id"
-                  @click="selectedTimeline = timeline.id"
-                  class="rounded-2xl border p-4 text-left transition-all duration-300"
-                  :class="
-                    selectedTimeline === timeline.id
-                      ? 'border-[#D4AF37]/60 bg-[#D4AF37]/[0.05]'
-                      : 'border-white/[0.08] bg-white/[0.015] hover:border-white/[0.18]'
-                  "
-                >
-                  <p
-                    class="text-xs font-bold"
-                    :class="selectedTimeline === timeline.id ? 'text-[#FCF6BA]' : 'text-zinc-300'"
-                  >
-                    {{ timeline.label }}
-                  </p>
-
-                  <p class="mt-1 text-[10px] text-zinc-600">
-                    {{ timeline.subLabel }}
-                  </p>
-                </button>
-              </div>
-            </Motion>
-
-            <!-- 03 ADDONS -->
-
-            <Motion
-              :initial="{ opacity: 0, y: 35 }"
-              :while-in-view="{ opacity: 1, y: 0 }"
-              :viewport="{ once: true, amount: 0.15 }"
-              :transition="{ duration: 0.6, delay: 0.08 }"
-              class="rounded-[1.75rem] border border-white/[0.08] bg-[#08080C] p-6 sm:p-8"
-            >
-              <div class="flex items-center gap-3">
-                <div
-                  class="flex h-9 w-9 items-center justify-center rounded-xl border border-[#D4AF37]/20 bg-[#D4AF37]/[0.04] text-[#D4AF37]"
-                >
-                  <span class="text-xs font-black"> 03 </span>
-                </div>
-
-                <div>
-                  <h3 class="text-sm font-black uppercase tracking-[0.08em]">
-                    Additional Services
-                  </h3>
-
-                  <p class="mt-1 text-[11px] text-zinc-600">
-                    Select any additional capabilities you need.
-                  </p>
-                </div>
-              </div>
-
-              <div class="mt-7 space-y-2">
-                <button
-                  v-for="addon in addons"
-                  :key="addon.id"
-                  @click="toggleAddon(addon.id)"
-                  class="flex w-full items-center justify-between gap-5 rounded-xl border p-4 text-left transition-all duration-300"
-                  :class="
-                    selectedAddons.includes(addon.id)
-                      ? 'border-[#D4AF37]/50 bg-[#D4AF37]/[0.04]'
-                      : 'border-white/[0.08] bg-white/[0.015] hover:border-white/[0.18]'
-                  "
-                >
-                  <div class="flex items-center gap-3">
-                    <div
-                      class="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition"
+                  <div class="grid gap-2.5 sm:grid-cols-2">
+                    <button
+                      v-for="project in projectTypes"
+                      :key="project.id"
+                      type="button"
+                      :while-hover="{ y: -3, scale: 1.01 }"
+                      :while-tap="{ scale: 0.99 }"
+                      class="group relative overflow-hidden rounded-2xl border p-4 text-left transition-all duration-200"
                       :class="
-                        selectedAddons.includes(addon.id)
-                          ? 'border-[#D4AF37] bg-[#D4AF37] text-black'
-                          : 'border-white/20'
+                        selectedType === project.id
+                          ? 'border-[#D4AF37]/50 bg-[#D4AF37]/[0.05] shadow-[0_0_25px_rgba(212,175,55,0.05)]'
+                          : 'border-white/[0.07] bg-[#0A0A0E] hover:border-white/15 hover:bg-[#0D0D12]'
                       "
+                      @click="selectedType = project.id"
                     >
-                      <Check v-if="selectedAddons.includes(addon.id)" :size="12" />
+                      <div class="flex items-start justify-between gap-3">
+                        <div
+                          class="flex h-9 w-9 items-center justify-center rounded-xl border transition"
+                          :class="
+                            selectedType === project.id
+                              ? 'border-[#D4AF37]/30 bg-[#D4AF37]/10 text-[#D4AF37]'
+                              : 'border-white/[0.07] bg-white/[0.02] text-zinc-600 group-hover:text-zinc-300'
+                          "
+                        >
+                          <component :is="project.icon" :size="16" />
+                        </div>
+
+                        <span class="font-mono text-[10px] font-bold text-[#D4AF37]">
+                          {{ formatCurrency(project.baseUsd, project.baseInr) }}
+                        </span>
+                      </div>
+
+                      <div class="mt-4">
+                        <p
+                          class="text-[15px] font-bold"
+                          :class="selectedType === project.id ? 'text-[#FCF6BA]' : 'text-zinc-300'"
+                        >
+                          {{ project.label }}
+                        </p>
+
+                        <p class="mt-1 text-[12px] leading-relaxed text-zinc-500">
+                          {{ project.desc }}
+                        </p>
+                      </div>
+
+                      <span
+                        v-if="selectedType === project.id"
+                        class="absolute bottom-3 right-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#D4AF37] text-black"
+                      >
+                        <Check :size="12" />
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                <div v-else-if="currentStep === 2" key="step-two" class="space-y-6">
+                  <div>
+                    <h3 class="text-lg font-black uppercase tracking-[-0.03em]">
+                      Shape the scope<span class="text-[#D4AF37]">.</span>
+                    </h3>
+                    <p class="mt-1 text-xs text-zinc-600">
+                      Select delivery speed and optional features.
+                    </p>
+                  </div>
+
+                  <div>
+                    <div class="mb-3 flex items-center justify-between">
+                      <span
+                        class="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 sm:text-[11px]"
+                      >
+                        Delivery
+                      </span>
+                      <Zap :size="13" class="text-[#D4AF37]" />
                     </div>
 
-                    <span
-                      class="text-[11px]"
-                      :class="selectedAddons.includes(addon.id) ? 'text-zinc-200' : 'text-zinc-500'"
+                    <div class="grid gap-2 sm:grid-cols-3">
+                      <button
+                        v-for="timeline in timelines"
+                        :key="timeline.id"
+                        type="button"
+                        :while-hover="{ y: -2, scale: 1.01 }"
+                        :while-tap="{ scale: 0.99 }"
+                        class="rounded-xl border p-3 text-left transition-all"
+                        :class="
+                          selectedTimeline === timeline.id
+                            ? 'border-[#D4AF37]/50 bg-[#D4AF37]/[0.05]'
+                            : 'border-white/[0.07] bg-[#0A0A0E] hover:border-white/15'
+                        "
+                        @click="selectedTimeline = timeline.id"
+                      >
+                        <div class="flex items-center justify-between">
+                          <span
+                            class="text-xs font-bold"
+                            :class="
+                              selectedTimeline === timeline.id ? 'text-[#FCF6BA]' : 'text-zinc-400'
+                            "
+                          >
+                            {{ timeline.label }}
+                          </span>
+
+                          <Check
+                            v-if="selectedTimeline === timeline.id"
+                            :size="13"
+                            class="text-[#D4AF37]"
+                          />
+                        </div>
+
+                        <p class="mt-1 text-[11px] text-zinc-500">{{ timeline.description }}</p>
+
+                        <p
+                          v-if="timeline.mult > 1"
+                          class="mt-2 font-mono text-[9px] uppercase text-[#D4AF37] sm:text-[10px]"
+                        >
+                          +{{ ((timeline.mult - 1) * 100).toFixed(0) }}% priority
+                        </p>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="mb-3 flex items-center justify-between">
+                      <span
+                        class="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 sm:text-[11px]"
+                      >
+                        Optional Add-ons
+                      </span>
+
+                      <span class="font-mono text-[10px] text-zinc-600">
+                        {{ selectedAddons.length }} selected
+                      </span>
+                    </div>
+
+                    <div class="space-y-2">
+                      <button
+                        v-for="addon in addons"
+                        :key="addon.id"
+                        type="button"
+                        :while-hover="{ y: -2, scale: 1.005 }"
+                        :while-tap="{ scale: 0.99 }"
+                        class="flex w-full items-center justify-between rounded-xl border p-3 text-left transition-all"
+                        :class="
+                          selectedAddons.includes(addon.id)
+                            ? 'border-[#D4AF37]/40 bg-[#D4AF37]/[0.045]'
+                            : 'border-white/[0.07] bg-[#0A0A0E] hover:border-white/15'
+                        "
+                        @click="toggleAddon(addon.id)"
+                      >
+                        <div class="flex items-center gap-3">
+                          <span
+                            class="flex h-6 w-6 items-center justify-center rounded-lg border"
+                            :class="
+                              selectedAddons.includes(addon.id)
+                                ? 'border-[#D4AF37] bg-[#D4AF37] text-black'
+                                : 'border-white/10 text-transparent'
+                            "
+                          >
+                            <Check :size="12" />
+                          </span>
+
+                          <span
+                            class="text-[13px]"
+                            :class="
+                              selectedAddons.includes(addon.id) ? 'text-zinc-200' : 'text-zinc-500'
+                            "
+                          >
+                            {{ addon.label }}
+                          </span>
+                        </div>
+
+                        <span class="font-mono text-[10px] text-[#D4AF37] sm:text-[11px]">
+                          +{{ formatCurrency(addon.usd, addon.inr) }}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-else key="step-three" class="space-y-5">
+                  <div>
+                    <h3 class="text-lg font-black uppercase tracking-[-0.03em] sm:text-xl">
+                      Almost there<span class="text-[#D4AF37]">.</span>
+                    </h3>
+                    <p class="mt-1 text-sm text-zinc-500">
+                      Leave your details so we can discuss the estimate.
+                    </p>
+                  </div>
+
+                  <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label
+                        class="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 sm:text-[11px]"
+                      >
+                        Full Name *
+                      </label>
+
+                      <input
+                        v-model="clientName"
+                        required
+                        type="text"
+                        maxlength="80"
+                        autocomplete="name"
+                        placeholder="Your name"
+                        :class="[
+                          'w-full rounded-xl border bg-[#0A0A0E] px-4 py-3 text-xs text-white outline-none transition focus:ring-1',
+                          fieldErrors.name
+                            ? 'border-red-500/50 focus:ring-red-500/10'
+                            : 'border-white/[0.08] focus:border-[#D4AF37]/50 focus:ring-[#D4AF37]/10',
+                        ]"
+                        @input="clearFieldError('name')"
+                      />
+
+                      <p
+                        v-if="fieldErrors.name"
+                        class="mt-1.5 flex items-center gap-1 text-[10px] text-red-400"
+                      >
+                        <AlertCircle :size="11" />
+                        {{ fieldErrors.name }}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label
+                        class="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 sm:text-[11px]"
+                      >
+                        Work Email *
+                      </label>
+
+                      <input
+                        v-model="clientEmail"
+                        required
+                        type="email"
+                        maxlength="150"
+                        autocomplete="email"
+                        placeholder="you@company.com"
+                        :class="[
+                          'w-full rounded-xl border bg-[#0A0A0E] px-4 py-3 text-xs text-white outline-none transition focus:ring-1',
+                          fieldErrors.email
+                            ? 'border-red-500/50 focus:ring-red-500/10'
+                            : 'border-white/[0.08] focus:border-[#D4AF37]/50 focus:ring-[#D4AF37]/10',
+                        ]"
+                        @input="clearFieldError('email')"
+                      />
+
+                      <p
+                        v-if="fieldErrors.email"
+                        class="mt-1.5 flex items-center gap-1 text-[10px] text-red-400"
+                      >
+                        <AlertCircle :size="11" />
+                        {{ fieldErrors.email }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label
+                        class="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 sm:text-[11px]"
+                      >
+                        Company / Organization
+                      </label>
+
+                      <input
+                        v-model="clientOrg"
+                        type="text"
+                        maxlength="120"
+                        autocomplete="organization"
+                        placeholder="Company name"
+                        class="w-full rounded-xl border border-white/[0.08] bg-[#0A0A0E] px-4 py-3 text-xs text-white outline-none transition focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/10"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        class="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 sm:text-[11px]"
+                      >
+                        Phone Number *
+                      </label>
+
+                      <input
+                        v-model="clientPhone"
+                        required
+                        type="tel"
+                        maxlength="20"
+                        autocomplete="tel"
+                        placeholder="+91 98765 43210"
+                        :class="[
+                          'w-full rounded-xl border bg-[#0A0A0E] px-4 py-3 text-xs text-white outline-none transition focus:ring-1',
+                          fieldErrors.phone
+                            ? 'border-red-500/50 focus:ring-red-500/10'
+                            : 'border-white/[0.08] focus:border-[#D4AF37]/50 focus:ring-[#D4AF37]/10',
+                        ]"
+                        @input="clearFieldError('phone')"
+                      />
+
+                      <p
+                        v-if="fieldErrors.phone"
+                        class="mt-1.5 flex items-center gap-1 text-[10px] text-red-400"
+                      >
+                        <AlertCircle :size="11" />
+                        {{ fieldErrors.phone }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      class="mb-2 block font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 sm:text-[11px]"
                     >
-                      {{ addon.label }}
-                    </span>
-                  </div>
+                      Project Notes
+                    </label>
 
-                  <span class="shrink-0 font-mono text-[10px] text-[#D4AF37]">
-                    +
-                    {{ formatCurrency(addon.usd, addon.inr) }}
-                  </span>
+                    <textarea
+                      v-model="clientNotes"
+                      rows="4"
+                      maxlength="3000"
+                      placeholder="Tell us briefly about your project..."
+                      class="w-full resize-none rounded-xl border border-white/[0.08] bg-[#0A0A0E] px-4 py-3 text-xs leading-relaxed text-white outline-none transition focus:border-[#D4AF37]/50 focus:ring-1 focus:ring-[#D4AF37]/10"
+                    ></textarea>
+                  </div>
+                </div>
+              </Transition>
+
+              <div v-show="currentStep === 3" class="mt-5 space-y-4">
+                <div class="flex w-full items-start justify-start overflow-visible pt-1 text-left">
+                  <div
+                    ref="turnstileContainer"
+                    class="turnstile-left flex min-h-[65px] w-auto items-start justify-start"
+                  ></div>
+                </div>
+
+                <Transition
+                  enter-active-class="transition duration-200 ease-out"
+                  enter-from-class="opacity-0 -translate-y-1"
+                  enter-to-class="opacity-100 translate-y-0"
+                >
+                  <div
+                    v-if="errorMessage"
+                    class="flex items-start gap-2 rounded-xl border border-red-500/20 bg-red-500/[0.04] px-4 py-3"
+                  >
+                    <AlertCircle :size="14" class="mt-0.5 shrink-0 text-red-400" />
+                    <p class="text-[11px] leading-relaxed text-red-400">
+                      {{ errorMessage }}
+                    </p>
+                  </div>
+                </Transition>
+              </div>
+
+              <div class="mt-6 flex items-center justify-between border-t border-white/[0.06] pt-5">
+                <button
+                  v-if="currentStep > 1"
+                  type="button"
+                  :disabled="isSubmitting"
+                  class="group flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-40 sm:text-[11px]"
+                  @click="previousStep"
+                >
+                  <ArrowLeft :size="13" class="transition group-hover:-translate-x-1" />
+                  Back
                 </button>
-              </div>
-            </Motion>
 
-            <!-- 04 CONTACT INFORMATION -->
-
-            <Motion
-              :initial="{ opacity: 0, y: 35 }"
-              :while-in-view="{ opacity: 1, y: 0 }"
-              :viewport="{ once: true, amount: 0.15 }"
-              :transition="{ duration: 0.6, delay: 0.1 }"
-              class="rounded-[1.75rem] border border-white/[0.08] bg-[#08080C] p-6 sm:p-8"
-            >
-              <div class="flex items-center gap-3">
-                <div
-                  class="flex h-9 w-9 items-center justify-center rounded-xl border border-[#D4AF37]/20 bg-[#D4AF37]/[0.04] text-[#D4AF37]"
-                >
-                  <span class="text-xs font-black"> 04 </span>
-                </div>
-
-                <div>
-                  <h3 class="text-sm font-black uppercase tracking-[0.08em]">
-                    Contact Information
-                  </h3>
-
-                  <p class="mt-1 text-[11px] text-zinc-600">
-                    Tell us where to send the final quotation.
-                  </p>
-                </div>
-              </div>
-
-              <!-- Name / Company / Email / Phone -->
-
-              <div class="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <!-- Name -->
-
-                <div>
-                  <label
-                    class="mb-2 flex items-center gap-2 text-[10px] font-medium uppercase tracking-wider text-zinc-500"
-                  >
-                    <User :size="12" />
-
-                    Your Name *
-                  </label>
-
-                  <input
-                    v-model="clientName"
-                    type="text"
-                    placeholder="Your name"
-                    class="h-12 w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 text-xs text-white outline-none transition placeholder:text-zinc-700 focus:border-[#D4AF37]/60"
-                  />
-                </div>
-
-                <!-- Email -->
-
-                <div>
-                  <label
-                    class="mb-2 flex items-center gap-2 text-[10px] font-medium uppercase tracking-wider text-zinc-500"
-                  >
-                    <Mail :size="12" />
-
-                    Email Address *
-                  </label>
-
-                  <input
-                    v-model="clientEmail"
-                    type="email"
-                    placeholder="you@company.com"
-                    class="h-12 w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 text-xs text-white outline-none transition placeholder:text-zinc-700 focus:border-[#D4AF37]/60"
-                  />
-                </div>
-
-                <!-- Phone -->
-
-                <div>
-                  <label
-                    class="mb-2 flex items-center gap-2 text-[10px] font-medium uppercase tracking-wider text-zinc-500"
-                  >
-                    <Phone :size="12" />
-
-                    Phone Number
-                  </label>
-
-                  <input
-                    v-model="clientPhone"
-                    type="tel"
-                    placeholder="+91 98765 43210"
-                    class="h-12 w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 text-xs text-white outline-none transition placeholder:text-zinc-700 focus:border-[#D4AF37]/60"
-                  />
-                </div>
-
-                <!-- Company -->
-
-                <div>
-                  <label
-                    class="mb-2 flex items-center gap-2 text-[10px] font-medium uppercase tracking-wider text-zinc-500"
-                  >
-                    <Building2 :size="12" />
-
-                    Company / Business
-                  </label>
-
-                  <input
-                    v-model="clientCompany"
-                    type="text"
-                    placeholder="Company name"
-                    class="h-12 w-full rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 text-xs text-white outline-none transition placeholder:text-zinc-700 focus:border-[#D4AF37]/60"
-                  />
-                </div>
-              </div>
-
-              <!-- Requirements -->
-
-              <div class="mt-4">
-                <label
-                  class="mb-2 flex items-center gap-2 text-[10px] font-medium uppercase tracking-wider text-zinc-500"
-                >
-                  <FileText :size="12" />
-
-                  Project Requirements
-                </label>
-
-                <textarea
-                  v-model="clientNotes"
-                  rows="4"
-                  placeholder="Tell us about pages, features, integrations, reference websites or other requirements..."
-                  class="w-full resize-none rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 text-xs leading-relaxed text-white outline-none transition placeholder:text-zinc-700 focus:border-[#D4AF37]/60"
-                ></textarea>
-              </div>
-
-              <!-- Validation Error -->
-
-              <Motion
-                v-if="submitError"
-                :initial="{ opacity: 0, y: -5 }"
-                :animate="{ opacity: 1, y: 0 }"
-                class="mt-4 rounded-xl border border-red-500/20 bg-red-500/[0.05] px-4 py-3 text-xs text-red-400"
-              >
-                {{ submitError }}
-              </Motion>
-            </Motion>
-          </div>
-
-          <!-- ================= ESTIMATE SIDEBAR ================= -->
-
-          <Motion
-            :initial="{ opacity: 0, x: 25 }"
-            :while-in-view="{ opacity: 1, x: 0 }"
-            :viewport="{ once: true, amount: 0.15 }"
-            :transition="{ duration: 0.65 }"
-            class="h-fit lg:sticky lg:top-28"
-          >
-            <div class="overflow-hidden rounded-[1.75rem] border border-[#D4AF37]/25 bg-[#08080C]">
-              <div class="p-6 sm:p-8">
-                <span class="text-[9px] font-bold uppercase tracking-[0.22em] text-[#D4AF37]">
-                  Estimated Starting Cost
-                </span>
-
-                <p class="mt-4 text-4xl font-black tracking-[-0.05em] text-white sm:text-5xl">
-                  {{ formatCurrency(calculatedUsd, calculatedInr) }}
-                </p>
-
-                <p class="mt-3 text-[11px] leading-relaxed text-zinc-600">
-                  This is an initial estimate. Final pricing may change depending on scope,
-                  integrations, complexity, and timeline.
-                </p>
-
-                <!-- Summary -->
-
-                <div class="mt-7 space-y-4 border-y border-white/[0.07] py-6">
-                  <div class="flex items-start justify-between gap-4">
-                    <span class="text-[10px] uppercase tracking-wider text-zinc-600">
-                      Project
-                    </span>
-
-                    <span class="max-w-[60%] text-right text-[11px] font-medium text-zinc-300">
-                      {{ selectedProject.label }}
-                    </span>
-                  </div>
-
-                  <div class="flex items-start justify-between gap-4">
-                    <span class="text-[10px] uppercase tracking-wider text-zinc-600">
-                      Timeline
-                    </span>
-
-                    <span class="text-right text-[11px] font-medium text-zinc-300">
-                      {{ selectedTimelineData.label }}
-                    </span>
-                  </div>
-
-                  <div class="flex items-start justify-between gap-4">
-                    <span class="text-[10px] uppercase tracking-wider text-zinc-600">
-                      Add-ons
-                    </span>
-
-                    <span class="text-right text-[11px] font-medium text-zinc-300">
-                      {{ selectedAddons.length }}
-                      selected
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Benefits -->
-
-                <div class="mt-6 space-y-3">
-                  <div class="flex items-center gap-2 text-[11px] text-zinc-500">
-                    <Check :size="14" class="text-[#D4AF37]" />
-
-                    Direct project communication
-                  </div>
-
-                  <div class="flex items-center gap-2 text-[11px] text-zinc-500">
-                    <Check :size="14" class="text-[#D4AF37]" />
-
-                    Source code delivery where applicable
-                  </div>
-
-                  <div class="flex items-center gap-2 text-[11px] text-zinc-500">
-                    <Check :size="14" class="text-[#D4AF37]" />
-
-                    Deployment and technical support options
-                  </div>
-                </div>
-
-                <!-- Submit -->
+                <div v-else></div>
 
                 <button
-                  @click="handleSubmit"
-                  class="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-[#D4AF37] py-4 text-[10px] font-black uppercase tracking-[0.14em] text-black transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(212,175,55,0.2)]"
+                  v-if="currentStep < 3"
+                  type="button"
+                  class="group flex items-center gap-2 rounded-xl bg-[#D4AF37] px-5 py-3 text-[10px] font-black uppercase tracking-widest text-black transition-all hover:bg-[#E4C55A] hover:shadow-[0_8px_30px_rgba(212,175,55,0.15)] sm:text-[11px]"
+                  @click="nextStep"
                 >
-                  <Send :size="14" />
+                  Continue
+                  <ArrowRight :size="13" class="transition group-hover:translate-x-1" />
+                </button>
 
-                  Request Project Estimate
+                <button
+                  v-else
+                  type="button"
+                  :disabled="
+                    isSubmitting || !clientName || !clientEmail || !clientPhone || !turnstileToken
+                  "
+                  class="group flex min-w-[190px] items-center justify-center gap-2 rounded-xl bg-[#D4AF37] px-6 py-3 text-[10px] font-black uppercase tracking-widest text-black transition-all hover:bg-[#E4C55A] disabled:cursor-not-allowed disabled:opacity-40 sm:text-[11px]"
+                  @click="handleSubmit"
+                >
+                  <Loader2 v-if="isSubmitting" :size="14" class="animate-spin" />
+
+                  <template v-else>
+                    Generate Estimate
+                    <Send :size="13" class="transition group-hover:translate-x-1" />
+                  </template>
                 </button>
               </div>
+            </div>
+          </div>
 
-              <div class="border-t border-white/[0.05] bg-white/[0.015] px-6 py-4 text-center">
-                <p class="text-[9px] leading-relaxed text-zinc-700">
-                  No payment is required. Submit your project details to request a quotation.
-                </p>
+          <aside
+            class="relative hidden min-h-0 border-l border-white/[0.07] bg-[#050507] lg:flex lg:flex-col"
+          >
+            <div class="flex flex-1 flex-col justify-between p-6">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span
+                    class="font-mono text-[10px] uppercase tracking-[0.25em] text-zinc-500 sm:text-[11px]"
+                  >
+                    Estimate
+                  </span>
+                  <Sparkles :size="14" class="text-[#D4AF37]" />
+                </div>
+
+                <div class="mt-8">
+                  <p
+                    class="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-500 sm:text-[11px]"
+                  >
+                    Estimated Investment
+                  </p>
+                  <p class="mt-3 text-4xl font-black tracking-[-0.06em] text-[#D4AF37]">
+                    {{ formatCurrency(calculatedUsd, calculatedInr) }}
+                  </p>
+                  <p class="mt-2 text-[11px] leading-relaxed text-zinc-500 sm:text-[12px]">
+                    Final pricing depends on project scope and requirements.
+                  </p>
+                </div>
+
+                <div class="mt-8 space-y-3 border-t border-white/[0.06] pt-5">
+                  <div class="flex items-center justify-between text-[12px]">
+                    <span class="text-zinc-500"> Service </span>
+                    <span class="max-w-[140px] truncate text-right text-zinc-300">
+                      {{ selectedProject.short }}
+                    </span>
+                  </div>
+
+                  <div class="flex items-center justify-between text-[12px]">
+                    <span class="text-zinc-500"> Delivery </span>
+                    <span class="text-zinc-300"> {{ selectedDelivery.label }} </span>
+                  </div>
+
+                  <div class="flex items-center justify-between text-[12px]">
+                    <span class="text-zinc-500"> Add-ons </span>
+                    <span class="text-zinc-300"> {{ selectedAddons.length }} </span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div class="rounded-2xl border border-[#D4AF37]/10 bg-[#D4AF37]/[0.025] p-4">
+                  <div class="flex gap-3">
+                    <ShieldCheck :size="18" class="shrink-0 text-[#D4AF37]" />
+
+                    <div>
+                      <p
+                        class="font-mono text-[10px] uppercase tracking-[0.18em] text-[#D4AF37] sm:text-[11px]"
+                      >
+                        Included
+                      </p>
+
+                      <p class="mt-2 text-[12px] leading-relaxed text-zinc-500">
+                        Source code ownership, responsive implementation and founder-level support.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-5 flex items-center justify-between">
+                  <span
+                    class="font-mono text-[8px] uppercase tracking-[0.2em] text-zinc-600 sm:text-[9px]"
+                  >
+                    MOMENTUM LAB
+                  </span>
+
+                  <span class="font-mono text-[8px] text-zinc-600 sm:text-[9px]">
+                    {{ String(currentStep).padStart(2, '0') }} / 03
+                  </span>
+                </div>
               </div>
             </div>
-          </Motion>
-        </div>
+          </aside>
+        </Motion>
+
+        <Motion
+          v-if="!isSubmitted"
+          :initial="{ opacity: 0, y: 18 }"
+          :animate="{ opacity: 1, y: 0 }"
+          :transition="{ duration: 0.45, delay: 0.1 }"
+          class="flex shrink-0 items-center justify-between border-t border-white/[0.07] bg-[#050507] px-4 py-3 lg:hidden"
+        >
+          <div>
+            <p class="font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-600 sm:text-[10px]">
+              Current Estimate
+            </p>
+            <p class="mt-0.5 text-lg font-black tracking-tight text-[#D4AF37]">
+              {{ formatCurrency(calculatedUsd, calculatedInr) }}
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="h-1.5 w-1.5 rounded-full bg-[#D4AF37]"></span>
+            <span
+              class="font-mono text-[9px] uppercase tracking-widest text-zinc-600 sm:text-[10px]"
+            >
+              Live Estimate
+            </span>
+          </div>
+        </Motion>
       </div>
     </main>
 
     <Footer />
   </div>
 </template>
+
+<style scoped>
+.turnstile-left {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  text-align: left !important;
+}
+
+.turnstile-left > div {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+  text-align: left !important;
+}
+
+.turnstile-left iframe {
+  display: block !important;
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+
+.turnstile-left [style*='margin'] {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+</style>

@@ -87,7 +87,7 @@ const router = createRouter({
       meta: {
         title: 'Affordable Pricing Packages | Web Development & Apps — Momentum Lab',
         description:
-          'Transparent, affordable pricing starting at ₹4,999 ($69 USD). Full-stack web development, SEO, landing pages, mobile apps, and cloud deployment packages.',
+          'Transparent, affordable pricing starting at ₹4,999 ($52 USD). Full-stack web development, SEO, landing pages, mobile apps, and cloud deployment packages.',
         keywords:
           'agency pricing packages, affordable web development India, fixed price web development, mobile app pricing, SEO optimization packages',
       },
