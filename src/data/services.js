@@ -8,8 +8,8 @@ export const services = [
 
     iconName: 'Code',
 
-    startingUsd: 119,
-    startingInr: 8999,
+    startingUsd: 125,
+    startingInr: 11999,
 
     heroTagline:
       'Custom websites and full-stack applications built for performance, scalability and real business needs.',
